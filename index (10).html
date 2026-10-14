@@ -1,0 +1,1882 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Projekt- &amp; Personaldisposition</title>
+<style>
+:root{--border:#d0d4e4;--ink:#323338;--muted:#676879;--surface:#f5f6f8;--brand:#0073ea;--brand-d:#0060b9;--soll:#579bfc;--ist:#00c875;--stuck:#e2445c;--warn:#fdab3d}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font:13px/1.35 Figtree,Roboto,ui-sans-serif,system-ui,-apple-system,"Segoe UI","Helvetica Neue",Arial,sans-serif;color:var(--ink);background:#fff;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+#app{display:flex;flex-direction:column;height:100vh;height:100dvh}
+
+/* Werkzeugleiste */
+.top{border-bottom:1px solid var(--border);background:#fff}
+.row1{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:8px 12px}
+.row2{display:flex;align-items:center;gap:8px;padding:0 12px 8px;overflow-x:auto}
+h1{font-size:15px;margin:0;font-weight:600;line-height:1.2}
+.sub{font-size:11px;color:var(--muted)}
+.spacer{margin-left:auto;display:flex;align-items:center;gap:8px}
+.badge{border-radius:99px;padding:2px 8px;font-size:11px;font-weight:500;background:rgba(253,171,61,.2);color:#9a6200;border:0}
+.badge.ok{background:rgba(0,200,117,.15);color:#037f4c}
+.btn{height:32px;padding:0 12px;border:1px solid var(--border);background:#fff;border-radius:4px;font-weight:500;white-space:nowrap;flex:none}
+.btn:hover{background:var(--surface)}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+.btn.primary:hover{background:var(--brand-d)}
+.btn.danger{background:var(--stuck);border-color:var(--stuck);color:#fff}
+.btn.ghost{border-color:transparent}
+.btn.ghost.red{color:var(--stuck)}
+.btn.sm{height:28px;padding:0 8px;font-size:12px}
+.btn.on{border-color:var(--stuck);background:rgba(226,68,92,.1);color:var(--stuck)}
+.btn:disabled{opacity:.5;pointer-events:none}
+.btn:focus-visible,.seg button:focus-visible,.bar:focus-visible{outline:2px solid rgba(0,115,234,.6);outline-offset:1px}
+.seg{display:inline-flex;flex:none;border:1px solid var(--border);border-radius:4px;padding:2px;background:#fff}
+.seg button{height:24px;border:0;background:none;border-radius:3px;padding:0 10px;font-size:12px;font-weight:500;color:var(--muted)}
+.seg button:hover{background:rgba(0,0,0,.05)}
+.seg button.on{background:rgba(0,115,234,.1);color:var(--brand)}
+.vsep{width:1px;height:20px;background:var(--border);flex:none;margin:0 4px}
+.kpi{display:none;gap:6px}
+@media(min-width:1180px){.kpi{display:flex}}
+.chip{display:flex;gap:6px;align-items:baseline;background:var(--surface);border-radius:4px;padding:4px 10px;font-size:12px;font-weight:500;font-variant-numeric:tabular-nums}
+.chip b{font-size:11px}
+.chip.s b{color:var(--soll)}.chip.i b{color:var(--ist)}
+
+/* Formularfelder */
+input[type=text],input[type=url],input[type=number],input[type=date],input[type=password],input:not([type]),select,textarea{
+  width:100%;height:32px;border:1px solid var(--border);border-radius:4px;background:#fff;padding:0 10px}
+textarea{height:auto;min-height:64px;padding:6px 10px;resize:vertical}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 1px var(--brand)}
+#q{width:176px}
+label.f{display:block;font-size:12px;font-weight:500;color:var(--muted);margin-bottom:4px}
+
+/* Zeitstrahl */
+#scroll{flex:1;min-height:0;overflow:auto;position:relative;scrollbar-width:thin;scrollbar-color:#c3c6d4 transparent}
+#scroll::-webkit-scrollbar{height:10px;width:10px}
+#scroll::-webkit-scrollbar-thumb{background:#c3c6d4;border-radius:8px;border:2px solid #fff}
+#content{position:relative;min-height:100%}
+.loading{display:flex;height:100%;min-height:200px;align-items:center;justify-content:center;color:var(--muted)}
+.hdr{position:sticky;top:0;z-index:30;display:flex;height:58px;background:#fff}
+.lh{position:sticky;left:0;z-index:40;flex:none;display:grid;align-items:end;padding-bottom:8px;background:#fff;border-bottom:1px solid var(--border);border-right:1px solid var(--border);font-size:12px;font-weight:500;color:var(--muted)}
+.th{flex:none;border-bottom:1px solid var(--border);background:#fff}
+.hr{display:flex}
+.hr.t{height:24px}.hr.b{height:34px}
+.st{flex:none;overflow:hidden;overflow:clip;border-right:1px solid var(--border);border-bottom:1px solid var(--border);font-size:11px;font-weight:600;line-height:23px}
+.st span{position:sticky;display:inline-block;white-space:nowrap;padding:0 8px}
+.sb{flex:none;overflow:hidden;overflow:clip;border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:11px;line-height:1.15;color:var(--muted)}
+.sb small{font-size:9px}
+.sb.we{background:var(--surface)}
+.sb.ho{background:#fffbeb;color:#b45309}
+.sb em{font-style:normal;font-weight:500;color:var(--ink)}
+.sb.we em,.sb.ho em{color:inherit}
+.sb.td em{background:var(--brand);color:#fff;border-radius:99px;padding:1px 6px}
+.body{position:relative}
+.ov{position:absolute;top:0;bottom:0;z-index:0;pointer-events:none}
+.ov .hol{position:absolute;top:0;bottom:0;background:rgba(254,243,199,.5)}
+.ov .now{position:absolute;top:0;bottom:0;width:2px;background:var(--stuck);z-index:5}
+.rowx{display:flex}
+.lc{position:sticky;left:0;z-index:20;flex:none;display:grid;align-items:center;border-bottom:1px solid var(--border);border-right:1px solid var(--border);background:#fff}
+.lc.grp{background:var(--surface)}
+.rowx.dr:hover .lc{background:var(--surface)}
+.tc{position:relative;flex:none;overflow:hidden;overflow:clip;border-bottom:1px solid var(--border)}
+.tc.z{z-index:10}
+.cell-name{display:flex;min-width:0;align-items:center}
+.nm{display:flex;min-width:0;flex:1;align-items:center;gap:6px;border:0;background:none;text-align:left;padding:8px 4px 8px 36px;font-size:13px}
+.nm span.t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gn{display:flex;min-width:0;flex:1;align-items:center;gap:6px;border:0;background:none;text-align:left;padding:4px 4px 4px 8px;font-size:13px;font-weight:600}
+.gn .t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gn .cnt{font-size:12px;font-weight:400;color:var(--muted);flex:none}
+.gn .stripe{width:4px;height:20px;border-radius:99px;flex:none}
+.ico{width:14px;height:14px;flex:none;display:block}
+.ico.lg{width:16px;height:16px}
+.warn{color:var(--stuck);flex:none;display:flex}
+.iconbtn{display:flex;align-items:center;border:0;background:none;border-radius:4px;padding:4px;margin-right:4px;color:var(--muted);flex:none}
+.iconbtn:hover{background:rgba(0,0,0,.06);color:var(--brand)}
+.js-add,.js-padd,.js-gadd{opacity:0}
+.rowx:hover .js-add,.rowx:hover .js-padd,.rowx:hover .js-gadd,.js-add:focus-visible,.js-padd:focus-visible,.js-gadd:focus-visible{opacity:1}
+.pill{display:inline-flex;height:20px;width:40px;align-items:center;justify-content:center;border-radius:99px;font-size:10px;font-weight:600;color:#fff}
+.pill.SOLL{background:var(--soll)}.pill.IST{background:var(--ist)}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.small{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.bar{position:absolute;z-index:10;height:24px;top:8px;border-radius:6px;color:#fff;font-size:11px;font-weight:500;display:flex;align-items:center;overflow:hidden;cursor:grab;user-select:none;-webkit-user-select:none;box-shadow:0 1px 2px rgba(0,0,0,.15)}
+.bar.ro{cursor:default}
+.bar.drag{box-shadow:0 0 0 2px rgba(0,115,234,.7);cursor:grabbing}
+.bar .lbl{display:flex;align-items:center;min-width:0;overflow:hidden;white-space:nowrap;padding:0 6px;text-shadow:0 0 2px rgba(0,0,0,.25)}
+.bar .lbl svg{margin-right:4px}
+.bar .h{position:absolute;top:0;bottom:0;width:8px;cursor:ew-resize;touch-action:none}
+.bar .h:hover{background:rgba(255,255,255,.3)}
+.bar .hs{left:0}.bar .he{right:0}
+.dchip{position:absolute;z-index:20;top:11px;height:18px;line-height:18px;padding:0 6px;border-radius:4px;background:#292f4c;color:#fff;font-size:10px;white-space:nowrap;pointer-events:none}
+.gbar{position:absolute;height:8px;top:15px;border-radius:99px;opacity:.5}
+.aus{display:flex;height:100%}
+.aus div{flex:none;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500}
+.empty{position:sticky;left:0;z-index:20;width:min(100vw,34rem);padding:48px 24px;text-align:center}
+.empty p{margin:0}
+.empty .t{font-size:14px;font-weight:500}
+.empty .s{margin-top:4px;font-size:12px;color:var(--muted)}
+.legend{display:flex;flex-wrap:wrap;align-items:center;gap:4px 16px;border-top:1px solid var(--border);padding:6px 12px;font-size:12px;color:var(--muted)}
+.legend span{display:flex;align-items:center;gap:6px}
+.legend i{display:block;width:20px;height:12px;border-radius:3px}
+.legend i.now{width:2px;background:var(--stuck)}
+#tip{position:fixed;z-index:200;display:none;max-width:320px;padding:8px 12px;border-radius:6px;background:#292f4c;color:#fff;font-size:12px;line-height:1.5;pointer-events:none;box-shadow:0 4px 14px rgba(0,0,0,.25)}
+#tip .sec{color:#ffb3c0;padding-top:4px}
+#toast{position:fixed;left:12px;bottom:56px;z-index:150;display:none;max-width:calc(100vw - 24px);align-items:flex-start;gap:12px;padding:12px 16px;border-radius:6px;background:var(--stuck);color:#fff;box-shadow:0 4px 14px rgba(0,0,0,.25)}
+#toast.ok{background:#037f4c}
+#toast button{border:0;background:none;color:#fff;opacity:.8;font-size:16px;line-height:1;padding:0}
+#printHdr{display:none;padding:12px 12px 8px}
+#printHdr .t{font-size:18px;font-weight:600}
+#printHdr .s{font-size:12px;color:var(--muted)}
+
+/* Dialoge */
+dialog{border:1px solid var(--border);border-radius:8px;padding:20px;width:min(520px,calc(100vw - 24px));max-height:92vh;max-height:92dvh;overflow:auto;box-shadow:0 10px 30px rgba(0,0,0,.2);color:var(--ink)}
+dialog::backdrop{background:rgba(0,0,0,.4)}
+dialog h2{margin:0;font-size:16px;font-weight:600}
+dialog .d{margin:4px 0 16px;font-size:12px;color:var(--muted)}
+.g2,.g3{display:grid;gap:12px;margin-bottom:12px}
+.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:1fr 1fr 1fr}
+.stack>*{margin-bottom:12px}
+.box{border:1px solid var(--border);border-radius:4px;padding:8px 12px;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.box .l{font-size:13px;color:var(--ink)}.box .l small{display:block;font-size:12px;color:var(--muted)}
+.info{background:var(--surface);border-radius:4px;padding:8px 12px;font-size:12px;color:var(--muted);margin-bottom:12px}
+.err{background:rgba(226,68,92,.1);color:var(--stuck);border-radius:4px;padding:8px 12px;font-size:12px;margin-bottom:12px}
+.okmsg{background:rgba(0,200,117,.12);color:#037f4c;border-radius:4px;padding:8px 12px;font-size:12px;margin-bottom:12px}
+.actions{display:flex;justify-content:space-between;align-items:center;gap:8px;padding-top:8px}
+.actions .r{display:flex;gap:8px;margin-left:auto}
+.sw{position:relative;width:36px;height:20px;flex:none}
+.sw input{position:absolute;inset:0;opacity:0;margin:0;width:100%;height:100%;cursor:pointer}
+.sw i{position:absolute;inset:0;border-radius:99px;background:#c5c7d0;transition:background .15s}
+.sw i::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.3);transition:transform .15s}
+.sw input:checked+i{background:var(--stuck)}
+.sw input:checked+i::after{transform:translateX(16px)}
+.sw input:focus-visible+i{outline:2px solid rgba(0,115,234,.6);outline-offset:1px}
+details{margin-bottom:12px;font-size:12px}
+details summary{cursor:pointer;color:var(--brand);font-weight:500}
+details pre{max-height:180px;overflow:auto;background:var(--surface);border-radius:4px;padding:8px;font-size:11px;margin:8px 0}
+
+/* Anmeldung */
+.login{position:fixed;inset:0;z-index:300;background:rgba(245,246,248,.98);display:flex;align-items:center;justify-content:center;padding:16px}
+.login[hidden]{display:none}
+.login form{width:min(380px,100%);background:#fff;border:1px solid var(--border);border-radius:8px;padding:24px;box-shadow:0 10px 30px rgba(0,0,0,.12)}
+.login h2{margin:0;font-size:18px;font-weight:600}
+.login .d{margin:4px 0 16px;font-size:12px;color:var(--muted)}
+.login label.f{margin-top:12px}
+.login .btn{width:100%;margin-top:16px;height:36px}
+.login .lnk{display:block;margin:14px auto 0;border:0;background:none;color:var(--brand);font-size:12px}
+
+/* Personalplanung */
+body[data-view="pers"] .v-proj{display:none!important}
+body[data-view="proj"] .v-pers{display:none!important}
+.tc.pr{cursor:cell}
+.bar.ab{height:6px;top:17px;border-left:0!important;border-radius:3px;box-shadow:none;opacity:.6}
+.bar.ab .lbl,.bar.ab .h{display:none}
+.bar.dim{opacity:.15}
+.crow{display:grid;grid-template-columns:36px 56px minmax(0,1fr) 88px 112px;gap:6px;margin-bottom:6px;align-items:center}
+.crow input[type=color]{width:36px;height:32px;padding:2px;border:1px solid var(--border);border-radius:4px;background:#fff}
+.crow.head{font-size:11px;color:var(--muted);font-weight:500;margin-bottom:4px}
+#codeList{max-height:52vh;overflow:auto;padding-right:4px}
+.legend i.hat{background:repeating-linear-gradient(135deg,#fdab3d 0 4px,#fde0b0 4px 8px)}
+.legend i.hat.k{background:repeating-linear-gradient(135deg,#e2445c 0 4px,#f4b5bf 4px 8px)}
+.legend i.thin{height:4px;background:#c5c7d0}
+
+@media print{
+  html,body{background:#fff!important;height:auto!important}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  #app{display:block;height:auto}
+  .noprint{display:none!important}
+  #printHdr{display:block}
+  #scroll{overflow:visible!important;height:auto!important}
+  .hdr,.lh,.lc,.st span,.empty{position:static!important}
+  .rowx,.hdr{break-inside:avoid}
+  #tip,#toast{display:none!important}
+}
+</style>
+</head>
+<body data-view="proj">
+<div id="app">
+  <header class="top noprint">
+    <div class="row1">
+      <div style="min-width:0">
+        <h1>Projekt- &amp; Personaldisposition</h1>
+        <div class="sub">VOB-Bauleitung · Malerarbeiten</div>
+      </div>
+      <div class="seg" data-seg="view" role="group" aria-label="Ansicht">
+        <button type="button" data-v="proj">Projekte</button><button type="button" data-v="pers">Personal</button>
+      </div>
+      <button class="badge" id="modeBadge" type="button" title="Verbindung einrichten"></button>
+      <div class="spacer">
+        <div class="kpi v-proj">
+          <div class="chip s"><b>SOLL</b><span id="kpiS"></span></div>
+          <div class="chip i"><b>IST</b><span id="kpiI"></span></div>
+        </div>
+        <button class="btn" id="btnSettings" type="button" title="Supabase-Verbindung">⚙ Verbindung</button>
+        <button class="btn" id="btnPrint" type="button">Drucken</button>
+        <button class="btn primary v-proj" id="btnNew" type="button">+ Neuer Eintrag</button>
+        <button class="btn v-pers" id="btnNewMa" type="button">+ Mitarbeiter</button>
+        <button class="btn primary v-pers" id="btnNewE" type="button">+ Einsatz</button>
+      </div>
+    </div>
+    <div class="row2">
+      <input id="q" type="text" placeholder="Projekt suchen" aria-label="Projekt suchen" autocomplete="off">
+      <div class="seg v-proj" data-seg="typ" role="group" aria-label="Typ filtern">
+        <button type="button" data-v="ALLE">Alle</button><button type="button" data-v="SOLL">SOLL</button><button type="button" data-v="IST">IST</button>
+      </div>
+      <button class="btn v-proj" id="btnBeh" type="button" aria-pressed="false">⚠ Nur Behinderungen</button>
+      <span class="vsep"></span>
+      <div class="seg" data-seg="zoom" role="group" aria-label="Zoomstufe">
+        <button type="button" data-v="tag">Tag</button><button type="button" data-v="woche">Woche</button><button type="button" data-v="monat">Monat</button>
+      </div>
+      <button class="btn" id="btnToday" type="button">Heute</button>
+      <button class="btn v-proj" id="btnKap" type="button"></button>
+      <select id="selCode" class="v-pers" style="width:220px;flex:none" aria-label="Baustelle filtern"></select>
+      <button class="btn v-pers" id="btnLegend" type="button">Legende / Kürzel</button>
+      <button class="btn" id="btnCompact" type="button"></button>
+      <button class="btn" id="btnFold" type="button">Alle einklappen</button>
+      <button class="btn primary v-proj" id="btnImport" type="button" hidden></button>
+      <button class="btn primary v-pers" id="btnImportP" type="button" hidden></button>
+    </div>
+  </header>
+
+  <div id="printHdr"></div>
+  <div id="scroll"><div id="content"><div class="loading">Daten werden geladen …</div></div></div>
+  <div class="legend v-pers">
+    <span><i class="hat"></i> Urlaub (U)</span>
+    <span><i class="hat k"></i> krank (K)</span>
+    <span><i style="background:#a25ddc"></i> Berufsschule (BS)</span>
+    <span><i class="thin"></i> Ab = abwesend / nicht eingeplant</span>
+    <span><i class="now"></i> Heute</span>
+    <span>Farben der Baustellen: Button „Legende / Kürzel“</span>
+  </div>
+  <div class="legend v-proj">
+    <span><i style="background:var(--soll)"></i> SOLL (Planung)</span>
+    <span><i style="background:var(--ist)"></i> IST</span>
+    <span><i style="background:repeating-linear-gradient(135deg,#e2445c 0 4px,#ee7487 4px 8px)"></i> VOB-Behinderung</span>
+    <span><i style="background:#fef3c7"></i> Feiertag Sachsen</span>
+    <span><i class="now"></i> Heute</span>
+  </div>
+</div>
+
+<div class="login noprint" id="login" hidden>
+  <form id="loginForm" novalidate>
+    <h2>Anmelden</h2>
+    <p class="d">Projekt- &amp; Personaldisposition</p>
+    <label class="f" for="l-mail">E-Mail</label>
+    <input id="l-mail" type="email" autocomplete="username" autocapitalize="none">
+    <label class="f" for="l-pw">Passwort</label>
+    <input id="l-pw" type="password" autocomplete="current-password">
+    <div class="err" id="lErr" hidden role="alert" style="margin:12px 0 0"></div>
+    <button class="btn primary" id="lGo" type="submit">Anmelden</button>
+    <button class="lnk" id="lConn" type="button">Verbindung ändern</button>
+  </form>
+</div>
+<div id="tip"></div>
+<div id="toast" role="alert"><span id="toastMsg"></span><button type="button" id="toastX" aria-label="Meldung schließen">×</button></div>
+
+<!-- Eintrag anlegen / bearbeiten -->
+<dialog id="dlg">
+  <form id="frm" novalidate>
+    <h2 id="dlgTitle"></h2>
+    <p class="d" id="dlgDesc"></p>
+    <div class="g2">
+      <div><label class="f" for="f-nr">Projektnummer</label><input id="f-nr" type="text" list="known" placeholder="1234567" autocomplete="off"><datalist id="known"></datalist></div>
+      <div><label class="f" for="f-name">Projektname</label><input id="f-name" type="text" placeholder="Projektname" autocomplete="off"></div>
+    </div>
+    <div class="g2">
+      <div><label class="f" for="f-bab">Bauabschnitt</label><input id="f-bab" type="text" placeholder="EG, OG1, Außendecke" autocomplete="off"></div>
+      <div><label class="f" for="f-typ">Typ</label><select id="f-typ"><option value="SOLL">SOLL (Planung)</option><option value="IST">IST (tatsächlich)</option></select></div>
+    </div>
+    <div class="g2">
+      <div><label class="f" for="f-start">Start</label><input id="f-start" type="date"></div>
+      <div><label class="f" for="f-end">Ende</label><input id="f-end" type="date"></div>
+    </div>
+    <div class="g3">
+      <div><label class="f" for="f-ak">Arbeitskräfte</label><input id="f-ak" type="text" inputmode="numeric"></div>
+      <div><label class="f" for="f-std">Std. je AK/Tag</label><input id="f-std" type="text" inputmode="decimal"></div>
+      <div><label class="f" for="f-ums">Umsatz €/h</label><input id="f-ums" type="text" inputmode="decimal"></div>
+    </div>
+    <div class="info" id="preview" hidden></div>
+    <div class="box">
+      <div class="l"><label for="f-beh">VOB-Behinderungsphase</label><small>Balken wird rot schraffiert dargestellt.</small></div>
+      <span class="sw"><input id="f-beh" type="checkbox"><i></i></span>
+    </div>
+    <div id="grundWrap" hidden style="margin-bottom:12px"><label class="f" for="f-grund">Grund der Behinderung</label><textarea id="f-grund" placeholder="z. B. Fehlende Vorleistung Trockenbau"></textarea></div>
+    <div style="margin-bottom:12px"><label class="f" for="f-url">Link zum Vorgang in monday.com</label><input id="f-url" type="url" placeholder="https://…"></div>
+    <div class="err" id="dlgErr" hidden role="alert"></div>
+    <div class="actions">
+      <div id="delWrap"></div>
+      <div class="r"><button type="button" class="btn" id="dlgCancel">Abbrechen</button><button type="submit" class="btn primary" id="dlgSave">Speichern</button></div>
+    </div>
+  </form>
+</dialog>
+
+<!-- Plan importieren -->
+<dialog id="dlgImport" style="max-width:440px">
+  <h2>Plan importieren</h2>
+  <p class="d" id="impText"></p>
+  <div class="actions"><div class="r"><button type="button" class="btn" id="impCancel">Abbrechen</button><button type="button" class="btn primary" id="impGo">Importieren</button></div></div>
+</dialog>
+
+<!-- Einsatz anlegen / bearbeiten -->
+<dialog id="dlgEin">
+  <form id="frmE" novalidate>
+    <h2 id="eTitle"></h2>
+    <p class="d" id="eDesc"></p>
+    <div class="g2">
+      <div><label class="f" for="e-ma">Mitarbeiter</label><select id="e-ma"></select></div>
+      <div><label class="f" for="e-code">Baustelle / Kürzel</label><select id="e-code"></select></div>
+    </div>
+    <div class="g2">
+      <div><label class="f" for="e-start">Von</label><input id="e-start" type="date"></div>
+      <div><label class="f" for="e-end">Bis</label><input id="e-end" type="date"></div>
+    </div>
+    <div style="margin-bottom:12px"><label class="f" for="e-note">Notiz</label><input id="e-note" type="text" placeholder="optional" autocomplete="off"></div>
+    <div class="info" id="e-prev" hidden></div>
+    <div class="err" id="eErr" hidden role="alert"></div>
+    <div class="actions"><div id="eDel"></div><div class="r"><button type="button" class="btn" id="eCancel">Abbrechen</button><button type="submit" class="btn primary" id="eSave">Speichern</button></div></div>
+  </form>
+</dialog>
+
+<!-- Mitarbeiter anlegen / bearbeiten -->
+<dialog id="dlgMa" style="max-width:420px">
+  <form id="frmM" novalidate>
+    <h2 id="mTitle"></h2>
+    <p class="d" id="mDesc"></p>
+    <div class="g2">
+      <div><label class="f" for="m-name">Name</label><input id="m-name" type="text" autocomplete="off"></div>
+      <div><label class="f" for="m-vor">Vorname</label><input id="m-vor" type="text" autocomplete="off"></div>
+    </div>
+    <div style="margin-bottom:12px"><label class="f" for="m-sub">Sub-Nr.</label><input id="m-sub" type="text" list="subs" placeholder="z. B. R04, RUS, LEH" autocomplete="off"><datalist id="subs"></datalist></div>
+    <div class="err" id="mErr" hidden role="alert"></div>
+    <div class="actions"><div id="mDel"></div><div class="r"><button type="button" class="btn" id="mCancel">Abbrechen</button><button type="submit" class="btn primary" id="mSave">Speichern</button></div></div>
+  </form>
+</dialog>
+
+<!-- Legende / Kürzel -->
+<dialog id="dlgCodes" style="width:min(760px,calc(100vw - 24px))">
+  <h2>Legende / Kürzel</h2>
+  <p class="d">Baustellen-Nummern und Kürzel aus der Excel-Planung. Farbe, Bezeichnung und Projektnummer lassen sich ändern. Die Art steuert die Zählung: nur „Baustelle“ zählt als Einsatz auf der Baustelle.</p>
+  <div class="crow head"><span>Farbe</span><span>Kürzel</span><span>Bezeichnung</span><span>Projekt-Nr.</span><span>Art</span></div>
+  <div id="codeList"></div>
+  <div class="err" id="cErr" hidden role="alert"></div>
+  <div class="actions"><button type="button" class="btn sm" id="cAdd">+ Kürzel</button><div class="r"><button type="button" class="btn" id="cCancel">Abbrechen</button><button type="button" class="btn primary" id="cSave">Speichern</button></div></div>
+</dialog>
+
+<!-- Personalplanung importieren -->
+<dialog id="dlgImportP" style="max-width:460px">
+  <h2>Excel-Planung importieren</h2>
+  <p class="d" id="impPText"></p>
+  <div class="actions"><div class="r"><button type="button" class="btn" id="impPCancel">Abbrechen</button><button type="button" class="btn primary" id="impPGo">Importieren</button></div></div>
+</dialog>
+
+<!-- Kapazität -->
+<dialog id="dlgKap" style="max-width:360px">
+  <h2>Kapazität &amp; Auslastung</h2>
+  <p class="d">Tage über der Kapazität werden im Zeitstrahl rot markiert. Gezählt werden nur Arbeitstage.</p>
+  <div class="stack">
+    <div><label class="f" for="k-ak">Verfügbare Arbeitskräfte</label><input id="k-ak" type="number" min="1" step="1"></div>
+    <div><label class="f">Auslastung berechnen aus</label>
+      <div class="seg" data-seg="kapTyp"><button type="button" data-v="SOLL">SOLL</button><button type="button" data-v="IST">IST</button></div></div>
+    <label style="display:flex;gap:8px;align-items:center;cursor:pointer"><input id="k-beh" type="checkbox" style="width:16px;height:16px"> Behinderungsphasen mitzählen</label>
+  </div>
+  <div class="actions"><div class="r"><button type="button" class="btn primary" id="kapClose">Fertig</button></div></div>
+</dialog>
+
+<!-- Drucken -->
+<dialog id="dlgPrint" style="max-width:380px">
+  <h2>Drucken / PDF</h2>
+  <p class="d">Der Zeitstrahl wird auf die Seitenbreite skaliert. Im Druckdialog „Als PDF speichern“ wählen.</p>
+  <div class="stack">
+    <div><label class="f">Format (Querformat)</label>
+      <div class="seg" data-seg="papier"><button type="button" data-v="A3">A3</button><button type="button" data-v="A4">A4</button></div></div>
+    <div class="g2" style="margin-bottom:0">
+      <div><label class="f" for="p-von">Von</label><input id="p-von" type="date"></div>
+      <div><label class="f" for="p-bis">Bis</label><input id="p-bis" type="date"></div>
+    </div>
+    <div class="err" id="prErr" hidden>Zeitraum prüfen: „Bis“ nach „Von“, maximal 400 Tage.</div>
+  </div>
+  <div class="actions"><div class="r"><button type="button" class="btn" id="prCancel">Abbrechen</button><button type="button" class="btn primary" id="prGo">Drucken</button></div></div>
+</dialog>
+
+<!-- Supabase-Verbindung -->
+<dialog id="dlgSet">
+  <h2>Supabase-Verbindung</h2>
+  <p class="d">Dasselbe Supabase-Projekt wie bei Lagerentnahme verwenden. Die Werte stehen im Supabase-Dashboard unter <b>Project Settings → API</b> und werden nur in diesem Browser gespeichert.</p>
+  <div class="stack">
+    <div><label class="f" for="s-url">Project URL</label><input id="s-url" type="url" placeholder="https://xxxxxxxx.supabase.co" autocomplete="off"></div>
+    <div><label class="f" for="s-key">anon public key (oder publishable key)</label><input id="s-key" type="password" placeholder="eyJ… / sb_publishable_…" autocomplete="off"></div>
+  </div>
+  <div class="info" id="sAcc" hidden style="display:flex;align-items:center;justify-content:space-between;gap:8px"><span id="sAccTxt"></span><button type="button" class="btn sm" id="sLogout">Abmelden</button></div>
+  <div class="okmsg" id="sOk" hidden></div>
+  <div class="err" id="sErr" hidden role="alert"></div>
+  <details>
+    <summary>Tabelle anlegen (einmalig im Supabase-Dashboard unter SQL Editor)</summary>
+    <pre id="sql"></pre>
+    <button type="button" class="btn sm" id="sqlCopy">SQL kopieren</button>
+    <p style="color:var(--muted);margin:8px 0 0">Die Policy „Voller Zugriff“ erlaubt jedem mit dem Key Lesen, Schreiben und Löschen der Tabelle <code>projekte</code>. Für den Produktivbetrieb Supabase Auth einrichten und auf <code>to authenticated</code> einschränken.</p>
+  </details>
+  <details>
+    <summary>Tabellen für die Personalplanung anlegen (einmalig im SQL Editor)</summary>
+    <pre id="sql2"></pre>
+    <button type="button" class="btn sm" id="sqlCopy2">SQL kopieren</button>
+    <p style="color:var(--muted);margin:8px 0 0">Legt <code>mitarbeiter</code>, <code>einsatz_codes</code> und <code>einsaetze</code> an. Danach in der Ansicht „Personal“ die Excel-Planung importieren. Auch hier gilt die offene Policy „Voller Zugriff“.</p>
+  </details>
+  <details>
+    <summary>Zugriff nur mit Login (Schritt 3 – vor dem Veröffentlichen ausführen)</summary>
+    <pre id="sql3"></pre>
+    <button type="button" class="btn sm" id="sqlCopy3">SQL kopieren</button>
+    <p style="color:var(--muted);margin:8px 0 0">Ersetzt die offene Policy „Voller Zugriff“ durch „Nur angemeldet“. Danach sehen und ändern nur Nutzer mit Login die Daten. Nutzer legst du in Supabase unter <b>Authentication → Users → Add user</b> an („Auto Confirm User“ anhaken). Unter <b>Authentication → Sign In / Providers</b> „Allow new users to sign up“ ausschalten.</p>
+  </details>
+  <div class="actions">
+    <button type="button" class="btn ghost red" id="sOff">Trennen (Demo)</button>
+    <div class="r"><button type="button" class="btn" id="sTest">Testen</button><button type="button" class="btn" id="sCancel">Abbrechen</button><button type="button" class="btn primary" id="sSave">Speichern &amp; verbinden</button></div>
+  </div>
+</dialog>
+
+<script>
+(() => {
+'use strict';
+
+/* ===================================================================
+   Hilfsfunktionen
+   =================================================================== */
+const $ = (s, r = document) => r.querySelector(s);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const uid = () => (window.crypto && crypto.randomUUID ? crypto.randomUUID() : 'id-' + Math.random().toString(36).slice(2) + Date.now().toString(36));
+const fmtN = new Intl.NumberFormat('de-DE', { maximumFractionDigits: 1 });
+const fmtE = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
+const num = (s) => Number(String(s).trim().replace(',', '.'));
+const safeUrl = (u) => (/^https?:\/\/\S+$/i.test(u || '') ? u : null);
+
+const ICON = {
+  warn: '<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.7 18-8-14a2 2 0 0 0-3.4 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.7-3Z"/><path d="M12 9v4M12 17h.01"/></svg>',
+  down: '<svg class="ico lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>',
+  right: '<svg class="ico lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>',
+  plus: '<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>',
+  link: '<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>',
+};
+
+/* ===================================================================
+   Datum (Tagesnummern, UTC) und Feiertage Sachsen
+   =================================================================== */
+const MS = 864e5;
+const MONATE = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+const MONATE_K = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
+const WT = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+const toDay = (iso) => { const [y, m, d] = iso.slice(0, 10).split('-').map(Number); return Math.round(Date.UTC(y, m - 1, d) / MS); };
+const fromDay = (n) => new Date(n * MS).toISOString().slice(0, 10);
+const todayNum = () => { const t = new Date(); return Math.round(Date.UTC(t.getFullYear(), t.getMonth(), t.getDate()) / MS); };
+const wd = (n) => (((n + 3) % 7) + 7) % 7;
+const parts = (n) => { const d = new Date(n * MS); return { y: d.getUTCFullYear(), m: d.getUTCMonth() + 1, d: d.getUTCDate() }; };
+const dnum = (y, m, d) => Math.round(Date.UTC(y, m - 1, d) / MS);
+const isoWeek = (n) => { const th = n - wd(n) + 3; const y = new Date(th * MS).getUTCFullYear(); return Math.floor((th - Date.UTC(y, 0, 1) / MS) / 7) + 1; };
+const fmtDE = (iso, y) => { const p = parts(toDay(iso)); const dd = String(p.d).padStart(2, '0'), mm = String(p.m).padStart(2, '0'); return y ? `${dd}.${mm}.${p.y}` : `${dd}.${mm}.`; };
+const fmtDay = (n, y) => fmtDE(fromDay(n), y);
+
+function easter(y) {
+  const a = y % 19, b = Math.floor(y / 100), c = y % 100, d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25);
+  const g = Math.floor((b - f + 1) / 3), h = (19 * a + b - d - g + 15) % 30, i = Math.floor(c / 4), k = c % 4;
+  const l = (32 + 2 * e + 2 * i - h - k) % 7, m = Math.floor((a + 11 * h + 22 * l) / 451);
+  const month = Math.floor((h + l - 7 * m + 114) / 31), day = ((h + l - 7 * m + 114) % 31) + 1;
+  return dnum(y, month, day);
+}
+const holCache = new Map();
+function holidays(y) {
+  if (holCache.has(y)) return holCache.get(y);
+  const o = easter(y), m = new Map();
+  m.set(dnum(y, 1, 1), 'Neujahr'); m.set(o - 2, 'Karfreitag'); m.set(o + 1, 'Ostermontag');
+  m.set(dnum(y, 5, 1), 'Tag der Arbeit'); m.set(o + 39, 'Christi Himmelfahrt'); m.set(o + 50, 'Pfingstmontag');
+  m.set(dnum(y, 10, 3), 'Tag der Deutschen Einheit'); m.set(dnum(y, 10, 31), 'Reformationstag');
+  let bub = dnum(y, 11, 22); while (wd(bub) !== 2) bub--;
+  m.set(bub, 'Buß- und Bettag'); m.set(dnum(y, 12, 25), '1. Weihnachtstag'); m.set(dnum(y, 12, 26), '2. Weihnachtstag');
+  holCache.set(y, m); return m;
+}
+const holiday = (n) => holidays(parts(n).y).get(n);
+const isWork = (n) => wd(n) < 5 && !holiday(n);
+const workdays = (a, b) => { let c = 0; for (let d = toDay(a), e = toDay(b); d <= e; d++) if (isWork(d)) c++; return c; };
+
+/* ===================================================================
+   Zustand
+   =================================================================== */
+const LS = {
+  get(k, d) { try { const v = localStorage.getItem('dispo.' + k); return v === null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v) { try { localStorage.setItem('dispo.' + k, JSON.stringify(v)); } catch { /* Speicher nicht verfügbar */ } },
+};
+/* Voreingestellte Verbindung (Supabase-Projekt „Personalplanung“). Gilt nur, solange im Browser noch nichts anderes
+   gespeichert ist; „Trennen (Demo)“ und neue Werte im Dialog „Verbindung“ haben Vorrang. */
+const DEFAULT_SB = { url: 'https://giyelfodjbepdbqxinkf.supabase.co', key: 'sb_publishable_qVEuWBSJI4BzCc5z1oZ-7Q_GuAm8tSl' };
+const S = {
+  rows: [], loading: true, demoLoaded: false, didScroll: false, pending: 0,
+  zoom: 'tag', query: '', typ: 'ALLE', nurBeh: false, collapsed: new Set(),
+  compact: LS.get('compact', false), kap: LS.get('kap', 12), kapTyp: LS.get('kapTyp', 'SOLL'), behMit: LS.get('behMit', true),
+  url: LS.get('sbUrl', DEFAULT_SB.url), key: LS.get('sbKey', DEFAULT_SB.key),
+  today: todayNum(), printWin: null, prevRs: null, saved: null, L: null,
+  session: LS.get('session', null),
+  view: LS.get('view', 'proj'), ma: [], codes: [], eins: [], codeIdx: new Map(), codeFilter: '',
+  pLoaded: false, pDemoLoaded: false, pError: null, didScrollP: false,
+};
+const isLive = () => !!(S.url && S.key);
+const byId = (id) => S.rows.find((r) => r.id === id);
+
+/* ===================================================================
+   Daten: Demo oder Supabase (PostgREST)
+   =================================================================== */
+function norm(r) {
+  return {
+    id: String(r.id), projekt_nummer: String(r.projekt_nummer ?? ''), projekt_name: String(r.projekt_name ?? ''),
+    bauabschnitt: String(r.bauabschnitt ?? ''), typ: r.typ === 'IST' ? 'IST' : 'SOLL',
+    start_datum: String(r.start_datum).slice(0, 10), end_datum: String(r.end_datum).slice(0, 10),
+    arbeitskraefte: Number(r.arbeitskraefte ?? 1), stunden_pro_ak_tag: Number(r.stunden_pro_ak_tag ?? 8),
+    umsatz_pro_stunde: Number(r.umsatz_pro_stunde ?? 0), ist_behindert: !!r.ist_behindert,
+    behinderung_grund: r.behinderung_grund ?? null, monday_item_url: r.monday_item_url ?? null, created_at: String(r.created_at ?? ''),
+  };
+}
+
+const validRow = (r) => /^\d{4}-\d{2}-\d{2}$/.test(r.start_datum) && /^\d{4}-\d{2}-\d{2}$/.test(r.end_datum);
+const FRANKFURT_NAMEN = {};
+const BEH_GRUND = 'Behinderungsphase lt. Bauablaufplan (Grund im Plan nicht genannt)';
+const FRANKFURT = [];
+
+function frankfurtRows() {
+  return FRANKFURT.map(([nr, typ, bab, s, e, beh]) => ({
+    projekt_nummer: nr, projekt_name: FRANKFURT_NAMEN[nr], bauabschnitt: bab, typ, start_datum: s, end_datum: e,
+    arbeitskraefte: 1, stunden_pro_ak_tag: 8, umsatz_pro_stunde: 0,
+    ist_behindert: !!beh, behinderung_grund: beh ? BEH_GRUND : null, monday_item_url: null,
+  }));
+}
+const rowKey = (r) => [r.projekt_nummer, r.typ, r.bauabschnitt, r.start_datum, r.end_datum].join('|');
+const frankfurtMissing = () => { const have = new Set(S.rows.map(rowKey)); return frankfurtRows().filter((r) => !have.has(rowKey(r))); };
+
+/* Ohne Supabase-Verbindung startet die App leer (Demo-Modus, Änderungen gehen beim Neuladen verloren). */
+function demoRows() {
+  return frankfurtRows().map((r) => ({ ...r, id: uid(), created_at: new Date().toISOString() }));
+}
+
+function cleanUrl(u) { return String(u || '').trim().replace(/\/+$/, '').replace(/\/rest\/v1$/i, ''); }
+
+/* ===================================================================
+   Anmeldung (Supabase Auth: E-Mail + Passwort)
+   =================================================================== */
+const sessionOk = () => !!(S.session && S.session.access_token);
+const nowSec = () => Math.floor(Date.now() / 1000);
+function saveSession(s) { S.session = s; LS.set('session', s); }
+
+async function authCall(path, body, creds) {
+  const url = creds ? creds.url : S.url, key = creds ? creds.key : S.key;
+  let res;
+  try { res = await fetch(`${url}/auth/v1/${path}`, { method: 'POST', headers: { apikey: key, 'Content-Type': 'application/json' }, body: JSON.stringify(body) }); }
+  catch { const e = new Error('Keine Verbindung zu Supabase (Internet oder URL prüfen).'); e.net = true; throw e; }
+  let j = null; try { j = await res.json(); } catch { /* leere Antwort */ }
+  if (!res.ok) {
+    const code = j && (j.error_code || j.code);
+    if (code === 'invalid_credentials') throw new Error('E-Mail oder Passwort stimmt nicht.');
+    if (code === 'email_not_confirmed') throw new Error('Die E-Mail-Adresse ist in Supabase nicht bestätigt (beim Anlegen „Auto Confirm User“ anhaken).');
+    throw new Error(((j && (j.msg || j.message || j.error_description)) || res.statusText || 'Anmeldung fehlgeschlagen') + ` (HTTP ${res.status})`);
+  }
+  return j || {};
+}
+async function signIn(email, password) {
+  const j = await authCall('token?grant_type=password', { email, password });
+  if (!j.access_token) throw new Error('Anmeldung fehlgeschlagen.');
+  saveSession({ access_token: j.access_token, refresh_token: j.refresh_token, expires_at: nowSec() + Number(j.expires_in || 3600), email: (j.user && j.user.email) || email });
+}
+let refreshing = null;
+async function ensureSession() {
+  if (!sessionOk()) throw new Error('Nicht angemeldet.');
+  if (S.session.expires_at - nowSec() > 60) return;
+  if (!refreshing) {
+    refreshing = (async () => {
+      try {
+        const j = await authCall('token?grant_type=refresh_token', { refresh_token: S.session.refresh_token });
+        saveSession({ ...S.session, access_token: j.access_token, refresh_token: j.refresh_token || S.session.refresh_token, expires_at: nowSec() + Number(j.expires_in || 3600) });
+      } catch (e) {
+        if (e.net) throw e;
+        endSession(); throw new Error('Sitzung abgelaufen – bitte neu anmelden.');
+      } finally { refreshing = null; }
+    })();
+  }
+  await refreshing;
+}
+function endSession() { saveSession(null); showLogin(); }
+function showLogin() { $('#login').hidden = false; $('#lErr').hidden = true; setTimeout(() => { const f = $('#l-mail').value ? $('#l-pw') : $('#l-mail'); f.focus(); }, 0); }
+const hideLogin = () => { $('#login').hidden = true; };
+async function signOut() {
+  if (sessionOk()) { try { await fetch(`${S.url}/auth/v1/logout`, { method: 'POST', headers: { apikey: S.key, Authorization: 'Bearer ' + S.session.access_token } }); } catch { /* offline: lokal abmelden */ } }
+  S.rows = []; S.demoLoaded = false; S.pending = 0; resetPersonal(); saveSession(null); S.loading = true;
+  $('#content').innerHTML = '<div class="loading">Bitte anmelden</div>'; showLogin();
+}
+
+async function api(method, query, body, prefer, creds, table = 'projekte') {
+  const url = creds ? creds.url : S.url, key = creds ? creds.key : S.key;
+  if (!creds) await ensureSession();
+  const headers = { apikey: key };
+  if (!creds && sessionOk()) headers.Authorization = 'Bearer ' + S.session.access_token;
+  else if (key.startsWith('eyJ')) headers.Authorization = 'Bearer ' + key; // publishable Keys (sb_…) nur als apikey senden
+  if (body !== undefined) headers['Content-Type'] = 'application/json';
+  if (prefer) headers.Prefer = prefer;
+  let res;
+  try {
+    res = await fetch(`${url}/rest/v1/${table}${query}`, { method, headers, body: body === undefined ? undefined : JSON.stringify(body) });
+  } catch (e) {
+    throw new Error('Keine Verbindung zu Supabase (Internet oder URL prüfen).');
+  }
+  if (!res.ok) {
+    if (res.status === 401 && !creds && sessionOk()) { endSession(); throw new Error('Sitzung abgelaufen – bitte neu anmelden.'); }
+    let msg = res.statusText || 'Fehler';
+    try {
+      const j = await res.json();
+      msg = j.message || j.hint || msg;
+      if (j.code === 'PGRST205' || res.status === 404) msg = `Tabelle „${table}“ nicht gefunden – SQL aus den Verbindungs-Einstellungen ausführen.`;
+      if (res.status === 401 || res.status === 403) msg = 'Zugriff verweigert – Key oder Policy prüfen. ' + (j.message || '');
+    } catch { /* kein JSON */ }
+    throw new Error(`${msg} (HTTP ${res.status})`);
+  }
+  if (res.status === 204) return null;
+  const text = await res.text();
+  return text ? JSON.parse(text) : null;
+}
+
+async function load(silent) {
+  if (isLive() && !sessionOk()) { S.loading = false; S.rows = []; render(); showLogin(); return; }
+  if (!isLive()) {
+    if (!S.demoLoaded) { S.rows = demoRows(); S.demoLoaded = true; }
+  } else {
+    try {
+      const data = await api('GET', '?select=*&order=start_datum.asc');
+      if (!silent || S.pending === 0) S.rows = (data || []).map(norm).filter(validRow);
+    } catch (e) {
+      if (!silent) toast('Laden fehlgeschlagen: ' + e.message, 'err');
+    }
+  }
+  S.loading = false;
+  render();
+  if (!S.didScroll) { S.didScroll = true; scrollToDay(S.today); }
+}
+
+async function createRow(input) {
+  if (!isLive()) { S.rows.push({ ...input, id: uid(), created_at: new Date().toISOString() }); render(); return true; }
+  S.pending++;
+  try {
+    const d = await api('POST', '', input, 'return=representation');
+    const r = norm(Array.isArray(d) ? d[0] : d);
+    if (!validRow(r)) throw new Error('Unerwartete Antwort von Supabase.');
+    if (!S.rows.some((x) => x.id === r.id)) S.rows.push(r);
+    render();
+    return true;
+  } catch (e) { toast('Anlegen fehlgeschlagen: ' + e.message, 'err'); return false; }
+  finally { S.pending--; }
+}
+
+async function updateRow(id, patch) {
+  const i = S.rows.findIndex((r) => r.id === id);
+  if (i < 0) return false;
+  const prev = S.rows[i];
+  S.rows[i] = { ...prev, ...patch };
+  render();
+  if (!isLive()) return true;
+  S.pending++;
+  try { await api('PATCH', '?id=eq.' + encodeURIComponent(id), patch, 'return=minimal'); return true; }
+  catch (e) {
+    const j = S.rows.findIndex((r) => r.id === id);
+    if (j >= 0) S.rows[j] = prev;
+    render();
+    toast('Speichern fehlgeschlagen: ' + e.message, 'err');
+    return false;
+  } finally { S.pending--; }
+}
+
+async function deleteRow(id) {
+  if (!isLive()) { S.rows = S.rows.filter((r) => r.id !== id); render(); return true; }
+  S.pending++;
+  try { await api('DELETE', '?id=eq.' + encodeURIComponent(id)); S.rows = S.rows.filter((r) => r.id !== id); render(); return true; }
+  catch (e) { toast('Löschen fehlgeschlagen: ' + e.message, 'err'); return false; }
+  finally { S.pending--; }
+}
+
+/* ===================================================================
+   Berechnung
+   =================================================================== */
+const stunden = (r) => workdays(r.start_datum, r.end_datum) * r.arbeitskraefte * r.stunden_pro_ak_tag;
+const umsatz = (r) => stunden(r) * r.umsatz_pro_stunde;
+const COLORS = ['#579bfc', '#a25ddc', '#ff642e', '#fdab3d', '#037f4c', '#00a9cc', '#e2445c', '#9cd326'];
+const hash = (s) => { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0; return h; };
+
+function buildGroups(rows) {
+  const map = new Map();
+  for (const r of rows) { if (!map.has(r.projekt_nummer)) map.set(r.projekt_nummer, []); map.get(r.projekt_nummer).push(r); }
+  const out = [];
+  for (const [nr, list] of map) {
+    list.sort((a, b) => a.bauabschnitt.localeCompare(b.bauabschnitt, 'de', { numeric: true }) || (a.typ === b.typ ? 0 : a.typ === 'SOLL' ? -1 : 1) || a.start_datum.localeCompare(b.start_datum));
+    const g = { key: nr, nr, name: list[0].projekt_name, color: COLORS[hash(nr) % COLORS.length], rows: list, s: Infinity, e: -Infinity, sH: 0, iH: 0, sU: 0, iU: 0, beh: 0 };
+    for (const r of list) {
+      g.s = Math.min(g.s, toDay(r.start_datum)); g.e = Math.max(g.e, toDay(r.end_datum));
+      const h = stunden(r), u = h * r.umsatz_pro_stunde;
+      if (r.typ === 'SOLL') { g.sH += h; g.sU += u; } else { g.iH += h; g.iU += u; }
+      if (r.ist_behindert) g.beh++;
+    }
+    out.push(g);
+  }
+  return out.sort((a, b) => a.s - b.s || a.nr.localeCompare(b.nr));
+}
+
+function auslastung(rs, re) {
+  const n = re - rs + 1, diff = new Int32Array(n + 1);
+  for (const p of S.rows) {
+    if (p.typ !== S.kapTyp || (!S.behMit && p.ist_behindert)) continue;
+    const s = Math.max(toDay(p.start_datum), rs), e = Math.min(toDay(p.end_datum), re);
+    if (e < s) continue;
+    diff[s - rs] += p.arbeitskraefte; diff[e - rs + 1] -= p.arbeitskraefte;
+  }
+  const out = new Int32Array(n); let run = 0;
+  for (let i = 0; i < n; i++) { run += diff[i]; out[i] = isWork(rs + i) ? run : 0; }
+  return out;
+}
+
+function filtered() {
+  const q = S.query.trim().toLowerCase();
+  return S.rows.filter((p) =>
+    (S.typ === 'ALLE' || p.typ === S.typ) && (!S.nurBeh || p.ist_behindert) &&
+    (!q || p.projekt_nummer.toLowerCase().includes(q) || p.projekt_name.toLowerCase().includes(q) || p.bauabschnitt.toLowerCase().includes(q)));
+}
+
+/* ===================================================================
+   Layout
+   =================================================================== */
+const ZOOM_W = { tag: 32, woche: 14, monat: 4.5 };
+const LEFT_FULL = 440, LEFT_COMPACT = 252, ROW_H = 40, GROUP_H = 38;
+const COLS_F = 'minmax(0,1fr) 54px 36px 96px 64px', COLS_C = 'minmax(0,1fr) 54px', COLS_P = 'minmax(0,1fr) 62px 86px';
+const paperPx = (p) => (((p === 'A3' ? 420 : 297) - 20) / 25.4) * 96;
+
+function normalRange() {
+  let min = S.today - 21, max = S.today + 120;
+  for (const p of (S.view === 'pers' ? S.eins : S.rows)) { min = Math.min(min, toDay(p.start_datum)); max = Math.max(max, toDay(p.end_datum)); }
+  min -= 14; max += 28;
+  return { rs: min - wd(min), re: max + (6 - wd(max)) };
+}
+
+function layout() {
+  let L;
+  if (S.printWin) {
+    const rs = S.printWin.von - wd(S.printWin.von), re = S.printWin.bis + (6 - wd(S.printWin.bis));
+    const raw = Math.floor(((paperPx(S.printWin.papier) - LEFT_FULL - 4) / (re - rs + 1)) * 100) / 100;
+    const dayW = Math.min(40, Math.max(2, raw));
+    L = { rs, re, dayW, zoom: dayW >= 20 ? 'tag' : dayW >= 8 ? 'woche' : 'monat', compact: false, ro: true };
+  } else {
+    const r = normalRange();
+    L = { rs: r.rs, re: r.re, dayW: ZOOM_W[S.zoom], zoom: S.zoom, compact: S.compact, ro: false };
+  }
+  L.leftW = L.compact ? LEFT_COMPACT : LEFT_FULL;
+  L.tw = (L.re - L.rs + 1) * L.dayW;
+  return L;
+}
+
+function monthSegs(rs, re, short) {
+  const out = []; let d = rs;
+  while (d <= re) {
+    const { y, m } = parts(d), next = m === 12 ? dnum(y + 1, 1, 1) : dnum(y, m + 1, 1), end = Math.min(re, next - 1);
+    out.push({ label: short ? MONATE_K[m - 1] : `${MONATE[m - 1]} ${y}`, start: d, days: end - d + 1 });
+    d = end + 1;
+  }
+  return out;
+}
+function yearSegs(rs, re) {
+  const out = []; let d = rs;
+  while (d <= re) { const { y } = parts(d), end = Math.min(re, dnum(y + 1, 1, 1) - 1); out.push({ label: String(y), start: d, days: end - d + 1 }); d = end + 1; }
+  return out;
+}
+function headerSegs(L) {
+  const t = S.today;
+  if (L.zoom === 'tag') {
+    const b = [];
+    for (let d = L.rs; d <= L.re; d++) b.push({ label: String(parts(d).d), sub: WT[wd(d)], start: d, days: 1, we: wd(d) >= 5, ho: holiday(d), td: d === t });
+    return { top: monthSegs(L.rs, L.re, false), bottom: b };
+  }
+  if (L.zoom === 'woche') {
+    const b = [];
+    for (let d = L.rs; d <= L.re; d += 7) b.push({ label: 'KW ' + isoWeek(d), start: d, days: Math.min(7, L.re - d + 1), td: t >= d && t < d + 7 });
+    return { top: monthSegs(L.rs, L.re, false), bottom: b };
+  }
+  return { top: yearSegs(L.rs, L.re), bottom: monthSegs(L.rs, L.re, true).map((s) => ({ ...s, td: t >= s.start && t < s.start + s.days })) };
+}
+
+/* ===================================================================
+   Rendering
+   =================================================================== */
+function headerHtml(L) {
+  const { top, bottom } = headerSegs(L);
+  const pers = S.view === 'pers';
+  const cols = L.compact ? COLS_C : (pers ? COLS_P : COLS_F);
+  let h = `<div class="hdr" style="width:${L.leftW + L.tw}px"><div class="lh" style="width:${L.leftW}px;grid-template-columns:${cols}"><div style="padding-left:12px">${pers ? 'Mitarbeiter' : 'Bauabschnitt'}</div><div>${pers ? 'Sub-Nr.' : 'Typ'}</div>`;
+  if (!L.compact) h += pers ? '<div class="num" style="padding-right:12px" title="Arbeitstage auf Baustellen (gesamt)">Einsatztage</div>' : '<div class="num">AK</div><div style="padding-left:12px">Zeitraum</div><div class="num" style="padding-right:12px">Std.</div>';
+  h += `</div><div class="th" style="width:${L.tw}px"><div class="hr t">`;
+  for (const s of top) h += `<div class="st" style="width:${s.days * L.dayW}px"><span style="left:${L.leftW}px">${esc(s.label)}</span></div>`;
+  h += '</div><div class="hr b">';
+  for (const s of bottom) {
+    h += `<div class="sb${s.we ? ' we' : ''}${s.ho ? ' ho' : ''}${s.td ? ' td' : ''}" style="width:${s.days * L.dayW}px"${s.ho ? ` title="${esc(s.ho)}"` : ''}>${s.sub ? `<small>${s.sub}</small>` : ''}<em>${esc(s.label)}</em></div>`;
+  }
+  return h + '</div></div></div>';
+}
+
+function overlayHtml(L) {
+  const layers = [];
+  if (L.zoom !== 'monat') layers.push(`repeating-linear-gradient(to right,transparent 0,transparent ${5 * L.dayW}px,rgba(103,104,121,.07) ${5 * L.dayW}px,rgba(103,104,121,.07) ${7 * L.dayW}px)`);
+  const step = L.zoom === 'tag' ? L.dayW : L.zoom === 'woche' ? 7 * L.dayW : 0;
+  if (step > 0) layers.push(`repeating-linear-gradient(to right,transparent 0,transparent ${step - 1}px,#e6e9ef ${step - 1}px,#e6e9ef ${step}px)`);
+  let h = `<div class="ov" style="left:${L.leftW}px;width:${L.tw}px;background-image:${layers.join(',') || 'none'}">`;
+  if (L.zoom !== 'monat') for (let d = L.rs; d <= L.re; d++) if (holiday(d)) h += `<div class="hol" style="left:${(d - L.rs) * L.dayW}px;width:${L.dayW}px"></div>`;
+  if (S.today >= L.rs && S.today <= L.re) h += `<div class="now" style="left:${(S.today - L.rs) * L.dayW + L.dayW / 2 - 1}px"></div>`;
+  return h + '</div>';
+}
+
+function ausHtml(L, vals) {
+  let max = 0; for (let i = 0; i < vals.length; i++) if (vals[i] > max) max = vals[i];
+  const over = max > S.kap, showN = L.dayW >= 22;
+  let h = `<div class="rowx" style="height:${ROW_H}px;width:${L.leftW + L.tw}px"><div class="lc" style="width:${L.leftW}px;display:flex;justify-content:space-between;gap:8px;padding:0 12px"><div style="min-width:0"><div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Personalbedarf (${S.kapTyp})</div><div class="sub">AK je Arbeitstag, alle Projekte</div></div><div style="flex:none;font-size:12px;font-weight:500;color:${over ? 'var(--stuck)' : 'var(--muted)'}">max. ${max} / ${S.kap} AK</div></div><div class="tc z" style="width:${L.tw}px"><div class="aus">`;
+  for (let i = 0; i < vals.length; i++) {
+    const n = vals[i], day = L.rs + i;
+    let bg = 'transparent', col = '#676879';
+    if (n > 0) {
+      if (n > S.kap) { bg = 'rgba(226,68,92,.85)'; col = '#fff'; }
+      else if (n >= S.kap * 0.8) { bg = 'rgba(253,171,61,.55)'; col = '#323338'; }
+      else { bg = 'rgba(0,200,117,.25)'; col = '#323338'; }
+    }
+    h += `<div title="${WT[wd(day)]} ${fmtDay(day, true)}: ${n} von ${S.kap} AK" style="width:${L.dayW}px;background:${bg};color:${col}">${showN && n > 0 ? n : ''}</div>`;
+  }
+  return h + '</div></div></div>';
+}
+
+function groupHtml(g, L) {
+  const zu = S.collapsed.has(g.key), cols = L.compact ? COLS_C : COLS_F;
+  const left = (g.s - L.rs) * L.dayW, w = Math.max((g.e - g.s + 1) * L.dayW, 6);
+  let h = `<div class="rowx" style="height:${GROUP_H}px;width:${L.leftW + L.tw}px"><div class="lc grp" style="width:${L.leftW}px;grid-template-columns:${cols}">`;
+  h += `<div class="cell-name"><button type="button" class="gn js-toggle" data-key="${esc(g.key)}" aria-expanded="${!zu}" style="color:${g.color}">${zu ? ICON.right : ICON.down}<span class="stripe" style="background:${g.color}"></span><span class="t">${esc(g.nr)} · ${esc(g.name)}</span><span class="cnt">${g.rows.length}</span>${g.beh ? `<span class="warn" title="${g.beh} Behinderungsphase(n)">${ICON.warn}</span>` : ''}</button>`;
+  h += `<button type="button" class="iconbtn js-add noprint" data-key="${esc(g.key)}" title="Bauabschnitt zu diesem Projekt hinzufügen" aria-label="Bauabschnitt hinzufügen">${ICON.plus}</button></div><div></div>`;
+  if (!L.compact) h += `<div></div><div class="small" style="padding-left:12px">${fmtDay(g.s)}–${fmtDay(g.e)}</div><div class="small num" style="padding-right:12px" title="SOLL ${fmtN.format(g.sH)} h · IST ${fmtN.format(g.iH)} h">${fmtN.format(g.sH)}</div>`;
+  h += `</div><div class="tc z" style="width:${L.tw}px"><div class="gbar" style="left:${left}px;width:${w}px;background:${g.color}"></div></div></div>`;
+  return h;
+}
+
+function rowHtml(r, L) {
+  const s = toDay(r.start_datum), e = toDay(r.end_datum), left = (s - L.rs) * L.dayW, w = Math.max((e - s + 1) * L.dayW, 6);
+  const cols = L.compact ? COLS_C : COLS_F, base = r.typ === 'SOLL' ? '#579bfc' : '#00c875';
+  const bg = r.ist_behindert ? 'repeating-linear-gradient(135deg,#e2445c 0 8px,#ee7487 8px 16px)' : base;
+  const label = w >= 90 ? `${r.arbeitskraefte} AK · ${esc(r.bauabschnitt)}` : w >= 40 ? `${r.arbeitskraefte} AK` : '';
+  const url = safeUrl(r.monday_item_url);
+  let h = `<div class="rowx dr" data-id="${esc(r.id)}" style="height:${ROW_H}px;width:${L.leftW + L.tw}px"><div class="lc" style="width:${L.leftW}px;grid-template-columns:${cols}">`;
+  h += `<div class="cell-name"><button type="button" class="nm js-edit" title="Eintrag bearbeiten">${r.ist_behindert ? `<span class="warn" title="${esc(r.behinderung_grund || 'Behinderungsphase')}">${ICON.warn}</span>` : ''}<span class="t">${esc(r.bauabschnitt)}</span></button>`;
+  if (url) h += `<a class="iconbtn noprint" href="${esc(url)}" target="_blank" rel="noopener noreferrer" title="Vorgang in monday.com öffnen" aria-label="Vorgang in monday.com öffnen">${ICON.link}</a>`;
+  h += `</div><div><span class="pill ${r.typ}">${r.typ}</span></div>`;
+  if (!L.compact) h += `<div class="num">${r.arbeitskraefte}</div><div class="small" style="padding-left:12px">${fmtDE(r.start_datum)}–${fmtDE(r.end_datum)}</div><div class="num small" style="padding-right:12px;color:var(--ink)">${fmtN.format(stunden(r))}</div>`;
+  h += `</div><div class="tc" style="width:${L.tw}px"><div class="bar${L.ro ? ' ro' : ''}" tabindex="0" data-id="${esc(r.id)}" role="button" aria-label="${esc(r.bauabschnitt)} ${r.typ}, ${fmtDE(r.start_datum, true)} bis ${fmtDE(r.end_datum, true)}" style="left:${left}px;width:${w}px;background:${bg};border-left:4px solid ${base}">`;
+  if (!L.ro) h += '<div class="h hs"></div>';
+  h += `<span class="lbl">${r.ist_behindert ? ICON.warn : ''}${label}</span>`;
+  if (!L.ro) h += '<div class="h he"></div>';
+  return h + '</div></div></div>';
+}
+
+function render() {
+  if (S.view === 'pers') { renderPers(); return; }
+  const content = $('#content'), scroll = $('#scroll');
+  if (S.loading) return;
+  const L = layout(); S.L = L;
+  const rows = S.printWin ? filtered().filter((p) => toDay(p.end_datum) >= L.rs && toDay(p.start_datum) <= L.re) : filtered();
+  const groups = buildGroups(rows);
+  const vals = auslastung(L.rs, L.re);
+
+  let h = headerHtml(L) + '<div class="body">' + overlayHtml(L) + ausHtml(L, vals);
+  if (!groups.length) {
+    h += `<div class="empty"><p class="t">${S.rows.length ? 'Keine Einträge für diese Filter' : 'Noch keine Einträge'}</p><p class="s">${S.rows.length ? 'Suche oder Filter anpassen, um Einträge zu sehen.' : 'Lege den ersten Bauabschnitt an, um ihn im Zeitstrahl zu planen.'}</p>${S.rows.length ? '' : '<button class="btn primary js-new" type="button" style="margin-top:16px">Ersten Eintrag anlegen</button>'}</div>`;
+  } else {
+    for (const g of groups) { h += groupHtml(g, L); if (!S.collapsed.has(g.key)) for (const r of g.rows) h += rowHtml(r, L); }
+  }
+  h += '</div>';
+  content.style.width = L.leftW + L.tw + 'px';
+  content.innerHTML = h;
+
+  if (!S.printWin) {
+    if (S.prevRs !== null && S.prevRs !== L.rs) scroll.scrollLeft += (S.prevRs - L.rs) * L.dayW;
+    S.prevRs = L.rs;
+  }
+  updateToolbar(groups);
+}
+
+function updateToolbar(groups) {
+  const k = groups.reduce((a, g) => ({ sH: a.sH + g.sH, iH: a.iH + g.iH, sU: a.sU + g.sU, iU: a.iU + g.iU }), { sH: 0, iH: 0, sU: 0, iU: 0 });
+  $('#kpiS').textContent = `${fmtN.format(k.sH)} h · ${fmtE.format(k.sU)}`;
+  $('#kpiI').textContent = `${fmtN.format(k.iH)} h · ${fmtE.format(k.iU)}`;
+  syncChrome();
+  $('#btnBeh').classList.toggle('on', S.nurBeh);
+  $('#btnBeh').setAttribute('aria-pressed', String(S.nurBeh));
+  $('#btnKap').textContent = `👥 Kapazität: ${S.kap} AK`;
+  $('#btnCompact').textContent = S.compact ? 'Tabelle voll' : 'Tabelle kompakt';
+  const allZu = groups.length > 0 && groups.every((g) => S.collapsed.has(g.key));
+  $('#btnFold').textContent = allZu ? 'Alle ausklappen' : 'Alle einklappen';
+  const miss = frankfurtMissing().length;
+  $('#btnImport').hidden = !(isLive() && miss > 0);
+  $('#btnImport').textContent = `Plan importieren (${miss})`;
+}
+
+/* gemeinsame Teile der Werkzeugleiste (beide Ansichten) */
+function syncChrome() {
+  document.body.dataset.view = S.view;
+  const badge = $('#modeBadge');
+  badge.textContent = isLive() ? 'Supabase verbunden' : 'Demo-Modus';
+  badge.className = 'badge' + (isLive() ? ' ok' : '');
+  badge.title = isLive() ? S.url : 'Keine Supabase-Verbindung – Änderungen gehen beim Neuladen verloren. Klicken zum Einrichten.';
+  $('#btnCompact').textContent = S.compact ? 'Tabelle voll' : 'Tabelle kompakt';
+  $('#q').placeholder = S.view === 'pers' ? 'Mitarbeiter suchen' : 'Projekt suchen';
+  const P = { typ: S.typ, zoom: S.zoom, kapTyp: S.kapTyp, papier: printState.papier, view: S.view };
+  document.querySelectorAll('.seg[data-seg]').forEach((seg) => {
+    seg.querySelectorAll('button').forEach((b) => { const on = b.dataset.v === P[seg.dataset.seg]; b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); });
+  });
+}
+const refreshChrome = () => { if (S.view === 'pers') updateToolbarPers(); else updateToolbar(buildGroups(filtered())); };
+
+/* ===================================================================
+   Scrollen
+   =================================================================== */
+function scrollToDay(day, smooth) {
+  const el = $('#scroll'), L = S.L; if (!L) return;
+  const left = Math.max(0, (day - L.rs) * L.dayW - (el.clientWidth - L.leftW) / 2);
+  if (smooth && el.scrollTo) el.scrollTo({ left, behavior: 'smooth' }); else el.scrollLeft = left;
+}
+function changeZoom(z) {
+  if (z === S.zoom) return;
+  const el = $('#scroll'), L = S.L;
+  const center = L ? L.rs + (el.scrollLeft + (el.clientWidth - L.leftW) / 2) / L.dayW : S.today;
+  S.zoom = z; render(); scrollToDay(center);
+}
+
+/* ===================================================================
+   Tooltip
+   =================================================================== */
+const tip = $('#tip');
+function tipHtml(r) {
+  let h = `<div style="font-weight:600">${esc(r.projekt_nummer)} · ${esc(r.projekt_name)}</div><div>${esc(r.bauabschnitt)} · ${r.typ}</div>`;
+  h += `<div>${fmtDE(r.start_datum, true)} – ${fmtDE(r.end_datum, true)} · ${workdays(r.start_datum, r.end_datum)} Arbeitstage</div>`;
+  h += `<div>${r.arbeitskraefte} AK · ${fmtN.format(stunden(r))} h · ${fmtE.format(umsatz(r))}</div>`;
+  if (r.ist_behindert) h += `<div class="sec">Behinderung: ${esc(r.behinderung_grund || 'kein Grund hinterlegt')}</div>`;
+  return h;
+}
+function placeTip(ev) {
+  const pad = 14, w = tip.offsetWidth, h = tip.offsetHeight;
+  let x = ev.clientX + pad, y = ev.clientY - h - pad;
+  if (x + w > window.innerWidth - 8) x = window.innerWidth - w - 8;
+  if (y < 8) y = ev.clientY + pad * 1.5;
+  tip.style.left = Math.max(8, x) + 'px'; tip.style.top = y + 'px';
+}
+const hideTip = () => { tip.style.display = 'none'; };
+
+/* ===================================================================
+   Balken ziehen / skalieren
+   =================================================================== */
+let drag = null;
+function onMove(ev) {
+  const d = drag; if (!d) return;
+  if (!d.moved && Math.abs(ev.clientX - d.x) < 4) return;
+  const delta = Math.round((ev.clientX - d.x) / S.L.dayW);
+  let ns = d.s, ne = d.e;
+  if (d.mode === 'move') { ns += delta; ne += delta; }
+  else if (d.mode === 'start') ns = Math.min(d.s + delta, d.e);
+  else ne = Math.max(d.e + delta, d.s);
+  if (ns === d.cur.s && ne === d.cur.e && d.moved) return;
+  d.moved = true; d.cur = { s: ns, e: ne };
+  const L = S.L, left = (ns - L.rs) * L.dayW, w = Math.max((ne - ns + 1) * L.dayW, 6);
+  d.bar.style.left = left + 'px'; d.bar.style.width = w + 'px'; d.bar.classList.add('drag');
+  d.chip.textContent = `${fmtDay(ns)} – ${fmtDay(ne)}`;
+  d.chip.style.left = left + w + 6 + 'px'; d.chip.style.display = 'block';
+}
+function endDrag() {
+  window.removeEventListener('pointermove', onMove); window.removeEventListener('pointerup', onUp); window.removeEventListener('pointercancel', onCancel);
+  if (drag && drag.chip) drag.chip.remove();
+}
+function onUp() {
+  const d = drag; if (!d) return;
+  endDrag(); drag = null;
+  if (d.moved) {
+    const patch = { start_datum: fromDay(d.cur.s), end_datum: fromDay(d.cur.e) };
+    if (d.kind === 'e') updateIn('eins', 'einsaetze', d.id, patch, 'Speichern'); else updateRow(d.id, patch);
+  }
+  else if (d.mode === 'move') { if (d.kind === 'e') openEinsatz(d.id); else openEdit(d.id); }
+  else render();
+}
+function onCancel() { if (!drag) return; endDrag(); drag = null; render(); }
+
+const content = $('#content');
+content.addEventListener('pointerdown', (ev) => {
+  const bar = ev.target.closest('.bar');
+  if (!bar || S.printWin || ev.button !== 0 || drag) return;
+  const kind = bar.dataset.kind === 'e' ? 'e' : 'p';
+  const r = kind === 'e' ? einById(bar.dataset.id) : byId(bar.dataset.id); if (!r) return;
+  const mode = ev.target.classList.contains('hs') ? 'start' : ev.target.classList.contains('he') ? 'end' : 'move';
+  const chip = document.createElement('div'); chip.className = 'dchip'; chip.style.display = 'none';
+  bar.parentElement.appendChild(chip);
+  drag = { id: r.id, kind, bar, chip, mode, x: ev.clientX, s: toDay(r.start_datum), e: toDay(r.end_datum), cur: { s: toDay(r.start_datum), e: toDay(r.end_datum) }, moved: false };
+  hideTip();
+  window.addEventListener('pointermove', onMove); window.addEventListener('pointerup', onUp); window.addEventListener('pointercancel', onCancel);
+  if (ev.pointerType === 'mouse') ev.preventDefault();
+});
+content.addEventListener('mousemove', (ev) => {
+  if (drag) return;
+  const bar = ev.target.closest('.bar'); if (!bar) { hideTip(); return; }
+  const isE = bar.dataset.kind === 'e', r = isE ? einById(bar.dataset.id) : byId(bar.dataset.id); if (!r) return;
+  tip.innerHTML = isE ? tipHtmlE(r) : tipHtml(r); tip.style.display = 'block'; placeTip(ev);
+});
+content.addEventListener('mouseleave', hideTip);
+content.addEventListener('keydown', (ev) => {
+  const bar = ev.target.closest && ev.target.closest('.bar');
+  if (bar && ev.key === 'Enter') { if (bar.dataset.kind === 'e') openEinsatz(bar.dataset.id); else openEdit(bar.dataset.id); }
+});
+content.addEventListener('click', (ev) => {
+  const t = ev.target;
+  const tog = t.closest('.js-toggle');
+  if (tog) { const k = tog.dataset.key; if (S.collapsed.has(k)) S.collapsed.delete(k); else S.collapsed.add(k); render(); return; }
+  const add = t.closest('.js-add');
+  if (add) { const g = S.rows.find((r) => r.projekt_nummer === add.dataset.key); openNew({ projekt_nummer: add.dataset.key, projekt_name: g ? g.projekt_name : '' }); return; }
+  const ed = t.closest('.js-edit');
+  if (ed) { openEdit(ed.closest('.rowx').dataset.id); return; }
+  if (t.closest('.js-new')) openNew({});
+  // --- Personal ---
+  const pa = t.closest('.js-padd'); if (pa) { openEinsatzNew({ mitarbeiter_id: pa.dataset.ma }); return; }
+  const gadd = t.closest('.js-gadd'); if (gadd) { openMaNew({ sub_nr: gadd.dataset.sub }); return; }
+  const pe = t.closest('.js-person'); if (pe) { openMa(pe.closest('.rowx').dataset.ma); return; }
+  if (t.closest('.js-retryP')) { S.pLoaded = false; S.pError = null; render(); loadPersonal(); return; }
+  if (t.closest('.js-sqlP')) { openSettings(); return; }
+  if (t.closest('.js-newMa')) { openMaNew({}); return; }
+  const cell = t.closest('.tc.pr');
+  if (cell && !t.closest('.bar') && !S.printWin && S.L) {
+    const day = S.L.rs + Math.floor((ev.clientX - cell.getBoundingClientRect().left) / S.L.dayW);
+    openEinsatzNew({ mitarbeiter_id: cell.dataset.ma, start_datum: fromDay(day), end_datum: fromDay(day + 4) });
+  }
+});
+
+/* ===================================================================
+   Dialog: Eintrag anlegen / bearbeiten
+   =================================================================== */
+const dlg = $('#dlg'), frm = $('#frm');
+const F = { nr: $('#f-nr'), name: $('#f-name'), bab: $('#f-bab'), typ: $('#f-typ'), start: $('#f-start'), end: $('#f-end'), ak: $('#f-ak'), std: $('#f-std'), ums: $('#f-ums'), beh: $('#f-beh'), grund: $('#f-grund'), url: $('#f-url') };
+let edit = { isEdit: false, id: null };
+const showDlg = (d) => { if (d.showModal) d.showModal(); else d.setAttribute('open', ''); };
+const closeDlg = (d) => { if (d.close) d.close(); else d.removeAttribute('open'); };
+
+function fillForm(p) {
+  F.nr.value = p.projekt_nummer ?? ''; F.name.value = p.projekt_name ?? ''; F.bab.value = p.bauabschnitt ?? ''; F.typ.value = p.typ ?? 'SOLL';
+  F.start.value = p.start_datum ?? ''; F.end.value = p.end_datum ?? ''; F.ak.value = p.arbeitskraefte ?? 1;
+  F.std.value = p.stunden_pro_ak_tag ?? 8; F.ums.value = p.umsatz_pro_stunde ?? 0; F.beh.checked = !!p.ist_behindert;
+  F.grund.value = p.behinderung_grund ?? ''; F.url.value = p.monday_item_url ?? '';
+  $('#grundWrap').hidden = !F.beh.checked; $('#dlgErr').hidden = true; updatePreview();
+  const known = new Map(); for (const r of S.rows) if (!known.has(r.projekt_nummer)) known.set(r.projekt_nummer, r.projekt_name);
+  $('#known').innerHTML = [...known].map(([nr, n]) => `<option value="${esc(nr)}">${esc(n)}</option>`).join('');
+}
+function openNew(preset) {
+  edit = { isEdit: false, id: null };
+  $('#dlgTitle').textContent = 'Neuer Eintrag'; $('#dlgDesc').textContent = 'SOLL = Planung, IST = tatsächlicher Ablauf.';
+  $('#delWrap').innerHTML = ''; $('#dlgSave').textContent = 'Eintrag anlegen';
+  fillForm({ start_datum: fromDay(S.today), end_datum: fromDay(S.today + 13), ...preset });
+  showDlg(dlg); F.nr.focus();
+}
+function openEdit(id) {
+  const r = byId(id); if (!r) return;
+  edit = { isEdit: true, id };
+  $('#dlgTitle').textContent = 'Eintrag bearbeiten'; $('#dlgDesc').textContent = 'Änderungen gelten sofort im Zeitstrahl.';
+  $('#dlgSave').textContent = 'Änderungen speichern';
+  $('#delWrap').innerHTML = '<button type="button" class="btn ghost red sm" id="delAsk">Löschen</button>';
+  fillForm(r); showDlg(dlg);
+}
+function updatePreview() {
+  const box = $('#preview');
+  if (!F.start.value || !F.end.value || F.end.value < F.start.value) { box.hidden = true; return; }
+  const t = workdays(F.start.value, F.end.value), h = t * num(F.ak.value || '0') * num(F.std.value || '0'), u = h * num(F.ums.value || '0');
+  if (![t, h, u].every(Number.isFinite)) { box.hidden = true; return; }
+  box.hidden = false; box.textContent = `${t} Arbeitstage (Mo–Fr ohne Feiertage Sachsen) · ${fmtN.format(h)} h · ${fmtE.format(u)}`;
+}
+[F.start, F.end, F.ak, F.std, F.ums].forEach((el) => el.addEventListener('input', updatePreview));
+F.beh.addEventListener('change', () => { $('#grundWrap').hidden = !F.beh.checked; });
+F.nr.addEventListener('change', () => {
+  const m = S.rows.find((r) => r.projekt_nummer === F.nr.value.trim());
+  if (m && !F.name.value.trim()) F.name.value = m.projekt_name;
+});
+
+function collect() {
+  const nr = F.nr.value.trim(), name = F.name.value.trim(), bab = F.bab.value.trim();
+  if (!nr || !name || !bab) return 'Projektnummer, Projektname und Bauabschnitt sind Pflichtfelder.';
+  if (!F.start.value || !F.end.value) return 'Bitte Start- und Enddatum angeben.';
+  if (F.end.value < F.start.value) return 'Das Ende darf nicht vor dem Start liegen.';
+  const ak = num(F.ak.value); if (!Number.isInteger(ak) || ak < 1) return 'Arbeitskräfte muss eine ganze Zahl ab 1 sein.';
+  const h = num(F.std.value); if (!Number.isFinite(h) || h <= 0 || h > 24) return 'Stunden pro AK und Tag müssen zwischen 0 und 24 liegen.';
+  const u = num(F.ums.value); if (!Number.isFinite(u) || u < 0) return 'Umsatz pro Stunde darf nicht negativ sein.';
+  if (F.beh.checked && !F.grund.value.trim()) return 'Bei einer Behinderungsphase ist ein Grund erforderlich.';
+  const url = F.url.value.trim(); if (url && !safeUrl(url)) return 'Der monday.com-Link muss mit http:// oder https:// beginnen.';
+  return { projekt_nummer: nr, projekt_name: name, bauabschnitt: bab, typ: F.typ.value, start_datum: F.start.value, end_datum: F.end.value, arbeitskraefte: ak, stunden_pro_ak_tag: h, umsatz_pro_stunde: u, ist_behindert: F.beh.checked, behinderung_grund: F.beh.checked ? F.grund.value.trim() : null, monday_item_url: url || null };
+}
+frm.addEventListener('submit', async (ev) => {
+  ev.preventDefault();
+  const res = collect(), err = $('#dlgErr');
+  if (typeof res === 'string') { err.textContent = res; err.hidden = false; return; }
+  err.hidden = true;
+  const btn = $('#dlgSave'); btn.disabled = true;
+  const ok = edit.isEdit ? await updateRow(edit.id, res) : await createRow(res);
+  btn.disabled = false;
+  if (ok) closeDlg(dlg);
+});
+$('#dlgCancel').addEventListener('click', () => closeDlg(dlg));
+$('#delWrap').addEventListener('click', async (ev) => {
+  if (ev.target.id === 'delAsk') {
+    $('#delWrap').innerHTML = '<span style="display:flex;gap:8px"><button type="button" class="btn danger sm" id="delGo">Endgültig löschen</button><button type="button" class="btn ghost sm" id="delNo">Abbrechen</button></span>';
+  } else if (ev.target.id === 'delNo') {
+    $('#delWrap').innerHTML = '<button type="button" class="btn ghost red sm" id="delAsk">Löschen</button>';
+  } else if (ev.target.id === 'delGo') {
+    ev.target.disabled = true;
+    if (await deleteRow(edit.id)) closeDlg(dlg); else ev.target.disabled = false;
+  }
+});
+
+/* ===================================================================
+   Dialog: Kapazität
+   =================================================================== */
+const dlgKap = $('#dlgKap');
+$('#btnKap').addEventListener('click', () => { $('#k-ak').value = S.kap; $('#k-beh').checked = S.behMit; showDlg(dlgKap); });
+$('#k-ak').addEventListener('input', (e) => { const n = Math.floor(Number(e.target.value)); if (Number.isFinite(n) && n >= 1) { S.kap = n; LS.set('kap', n); render(); } });
+$('#k-beh').addEventListener('change', (e) => { S.behMit = e.target.checked; LS.set('behMit', S.behMit); render(); });
+$('#kapClose').addEventListener('click', () => closeDlg(dlgKap));
+
+/* ===================================================================
+   Dialog: Drucken
+   =================================================================== */
+const dlgPrint = $('#dlgPrint');
+const printState = { papier: 'A3' };
+function printValid() {
+  const v = $('#p-von').value, b = $('#p-bis').value;
+  const ok = v !== '' && b !== '' && b >= v && toDay(b) - toDay(v) <= 400;
+  $('#prErr').hidden = ok; $('#prGo').disabled = !ok; return ok;
+}
+$('#btnPrint').addEventListener('click', () => {
+  const el = $('#scroll'), L = S.L;
+  let von = S.today - 7, bis = S.today + 49;
+  if (L) { von = Math.floor(L.rs + el.scrollLeft / L.dayW); bis = Math.min(Math.max(von + 28, Math.floor(von + (el.clientWidth - L.leftW) / L.dayW)), von + 120); }
+  $('#p-von').value = fromDay(von); $('#p-bis').value = fromDay(bis);
+  printValid(); refreshChrome(); showDlg(dlgPrint);
+});
+['#p-von', '#p-bis'].forEach((s) => $(s).addEventListener('input', printValid));
+$('#prCancel').addEventListener('click', () => closeDlg(dlgPrint));
+$('#prGo').addEventListener('click', () => {
+  if (!printValid()) return;
+  const von = toDay($('#p-von').value), bis = toDay($('#p-bis').value);
+  closeDlg(dlgPrint);
+  let st = document.getElementById('print-page-style');
+  if (!st) { st = document.createElement('style'); st.id = 'print-page-style'; document.head.appendChild(st); }
+  st.textContent = `@page { size: ${printState.papier} landscape; margin: 10mm; }`;
+  S.saved = { l: $('#scroll').scrollLeft, t: $('#scroll').scrollTop };
+  S.printWin = { papier: printState.papier, von, bis };
+  const bits = [`Zeitraum ${fmtDay(von, true)} – ${fmtDay(bis, true)}`, `Stand ${fmtDay(S.today, true)}`];
+  if (S.view === 'pers') { if (S.codeFilter) bits.push('Baustelle ' + codeOf(S.codeFilter).bezeichnung); }
+  else {
+    if (S.typ !== 'ALLE') bits.push('nur ' + S.typ);
+    if (S.nurBeh) bits.push('nur Behinderungen');
+  }
+  if (S.query.trim()) bits.push(`Suche „${S.query.trim()}“`);
+  $('#printHdr').innerHTML = `<div class="t">${S.view === 'pers' ? 'Personalplanung' : 'Projekt- &amp; Personaldisposition'}</div><div class="s">${esc(bits.join(' · '))}</div>`;
+  render();
+  window.print();
+});
+window.addEventListener('afterprint', () => {
+  if (!S.printWin) return;
+  S.printWin = null; $('#printHdr').innerHTML = ''; render();
+  if (S.saved) { $('#scroll').scrollLeft = S.saved.l; $('#scroll').scrollTop = S.saved.t; S.saved = null; }
+});
+
+/* ===================================================================
+   Dialog: Supabase-Verbindung
+   =================================================================== */
+const SCHEMA_SQL = `-- Einmalig im Supabase-Dashboard unter "SQL Editor" ausführen
+create table public.projekte (
+  id uuid primary key default gen_random_uuid(),
+  projekt_nummer text not null,
+  projekt_name text not null,
+  bauabschnitt text not null,
+  typ text not null check (typ in ('SOLL', 'IST')),
+  start_datum date not null,
+  end_datum date not null,
+  arbeitskraefte int not null default 1,
+  stunden_pro_ak_tag numeric default 8.0,
+  umsatz_pro_stunde numeric default 0.0,
+  ist_behindert boolean default false,
+  behinderung_grund text,
+  monday_item_url text,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+create index idx_projekte_daten on public.projekte (start_datum, end_datum);
+create index idx_projekte_nummer on public.projekte (projekt_nummer);
+create index idx_projekte_behindert on public.projekte (ist_behindert);
+
+alter table public.projekte enable row level security;
+create policy "Voller Zugriff" on public.projekte for all using (true) with check (true);
+
+alter table public.projekte
+  add constraint projekte_zeitraum_check check (end_datum >= start_datum),
+  add constraint projekte_ak_check check (arbeitskraefte >= 1);`;
+$('#sql').textContent = SCHEMA_SQL;
+
+const dlgSet = $('#dlgSet');
+function setMsg(kind, text) {
+  $('#sOk').hidden = kind !== 'ok'; $('#sErr').hidden = kind !== 'err';
+  if (kind === 'ok') $('#sOk').textContent = text; if (kind === 'err') $('#sErr').textContent = text;
+}
+function openSettings() {
+  $('#s-url').value = S.url; $('#s-key').value = S.key; setMsg(null);
+  $('#sAcc').hidden = !sessionOk(); if (sessionOk()) $('#sAccTxt').textContent = 'Angemeldet als ' + (S.session.email || 'Nutzer');
+  showDlg(dlgSet);
+}
+$('#btnSettings').addEventListener('click', openSettings);
+$('#modeBadge').addEventListener('click', openSettings);
+$('#sCancel').addEventListener('click', () => closeDlg(dlgSet));
+function readCreds() {
+  const url = cleanUrl($('#s-url').value), key = $('#s-key').value.trim();
+  if (!/^https?:\/\/\S+$/i.test(url)) { setMsg('err', 'Bitte die Project URL angeben (https://….supabase.co).'); return null; }
+  if (key.length < 20) { setMsg('err', 'Bitte den anon public key bzw. publishable key angeben.'); return null; }
+  return { url, key };
+}
+async function testCreds(c) {
+  setMsg(null);
+  try { await api('GET', '?select=id&limit=1', undefined, undefined, c); return true; }
+  catch (e) { setMsg('err', e.message); return false; }
+}
+$('#sTest').addEventListener('click', async () => {
+  const c = readCreds(); if (!c) return;
+  $('#sTest').disabled = true;
+  if (await testCreds(c)) setMsg('ok', 'Verbindung ok – Tabelle „projekte“ ist erreichbar.');
+  $('#sTest').disabled = false;
+});
+$('#sSave').addEventListener('click', async () => {
+  const c = readCreds(); if (!c) return;
+  $('#sSave').disabled = true;
+  const ok = await testCreds(c);
+  $('#sSave').disabled = false;
+  if (!ok) return;
+  if (c.url !== S.url || c.key !== S.key) saveSession(null);
+  S.url = c.url; S.key = c.key; LS.set('sbUrl', c.url); LS.set('sbKey', c.key);
+  S.rows = []; S.pending = 0; S.loading = true; resetPersonal(); closeDlg(dlgSet);
+  $('#content').innerHTML = '<div class="loading">Daten werden geladen …</div>';
+  await load();
+  if (sessionOk()) toast('Mit Supabase verbunden.', 'ok');
+});
+$('#sOff').addEventListener('click', () => {
+  S.url = ''; S.key = ''; LS.set('sbUrl', ''); LS.set('sbKey', ''); saveSession(null); hideLogin();
+  S.demoLoaded = false; S.rows = []; resetPersonal(); closeDlg(dlgSet); load();
+});
+$('#sqlCopy').addEventListener('click', async () => {
+  try { await navigator.clipboard.writeText(SCHEMA_SQL); $('#sqlCopy').textContent = 'Kopiert ✓'; }
+  catch { const r = document.createRange(); r.selectNodeContents($('#sql')); const s = getSelection(); s.removeAllRanges(); s.addRange(r); $('#sqlCopy').textContent = 'Markiert – jetzt kopieren'; }
+});
+
+/* ===================================================================
+   Toolbar & Toast
+   =================================================================== */
+let toastTimer = null;
+function toast(msg, kind) {
+  const t = $('#toast');
+  $('#toastMsg').textContent = msg; t.className = kind === 'ok' ? 'ok' : ''; t.style.display = 'flex';
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.style.display = 'none'; }, kind === 'ok' ? 3500 : 10000);
+}
+$('#toastX').addEventListener('click', () => { $('#toast').style.display = 'none'; });
+
+document.addEventListener('click', (ev) => {
+  const b = ev.target.closest('.seg[data-seg] button'); if (!b) return;
+  const key = b.closest('.seg').dataset.seg, v = b.dataset.v;
+  if (key === 'zoom') changeZoom(v);
+  else if (key === 'typ') { S.typ = v; render(); }
+  else if (key === 'kapTyp') { S.kapTyp = v; LS.set('kapTyp', v); render(); }
+  else if (key === 'papier') { printState.papier = v; refreshChrome(); }
+  else if (key === 'view') setView(v);
+});
+$('#q').addEventListener('input', (e) => { S.query = e.target.value; render(); });
+$('#btnBeh').addEventListener('click', () => { S.nurBeh = !S.nurBeh; render(); });
+$('#btnToday').addEventListener('click', () => scrollToDay(S.today, true));
+$('#btnNew').addEventListener('click', () => openNew({}));
+$('#btnCompact').addEventListener('click', () => { S.compact = !S.compact; LS.set('compact', S.compact); render(); });
+$('#btnFold').addEventListener('click', () => {
+  const keys = S.view === 'pers' ? persGroups(persPeople().people).map((g) => g.key) : buildGroups(filtered()).map((g) => g.key);
+  const allZu = keys.length > 0 && keys.every((k) => S.collapsed.has(k));
+  S.collapsed = allZu ? new Set() : new Set(keys); render();
+});
+
+/* Personalplanung */
+const XL_D0 = '2022-12-05';
+const XL_MA = [];
+const XL_CODES = [];
+const XL_EIN = [];
+
+const d0 = toDay(XL_D0);
+const SQL_P = `-- Einmalig im Supabase-Dashboard unter "SQL Editor" ausführen
+create table public.mitarbeiter (
+  id uuid primary key default gen_random_uuid(),
+  sub_nr text,
+  name text not null,
+  vorname text,
+  sortierung int not null default 0,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+create table public.einsatz_codes (
+  code text primary key,
+  art text not null check (art in ('baustelle', 'abwesenheit', 'sonstiges')),
+  bezeichnung text,
+  projekt_nummer text,
+  farbe text
+);
+
+create table public.einsaetze (
+  id uuid primary key default gen_random_uuid(),
+  mitarbeiter_id uuid not null references public.mitarbeiter(id) on delete cascade,
+  code text not null references public.einsatz_codes(code) on update cascade,
+  start_datum date not null,
+  end_datum date not null,
+  notiz text,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  constraint einsaetze_zeitraum_check check (end_datum >= start_datum)
+);
+
+create index idx_einsaetze_ma on public.einsaetze (mitarbeiter_id);
+create index idx_einsaetze_daten on public.einsaetze (start_datum, end_datum);
+
+alter table public.mitarbeiter enable row level security;
+alter table public.einsatz_codes enable row level security;
+alter table public.einsaetze enable row level security;
+create policy "Voller Zugriff" on public.mitarbeiter for all using (true) with check (true);
+create policy "Voller Zugriff" on public.einsatz_codes for all using (true) with check (true);
+create policy "Voller Zugriff" on public.einsaetze for all using (true) with check (true);`;
+
+const maName = (m) => (m ? m.name + (m.vorname ? ' ' + m.vorname : '') : '');
+const maKey = (m) => [m.sub_nr || '', m.name, m.vorname || ''].join('|');
+const maById = (id) => S.ma.find((m) => m.id === id);
+const einById = (id) => S.eins.find((e) => e.id === id);
+const FALLBACK = { art: 'sonstiges', bezeichnung: '', projekt_nummer: '', farbe: '#9AA0B5' };
+const codeOf = (code) => S.codeIdx.get(code) || { ...FALLBACK, code, bezeichnung: code };
+const indexCodes = () => { S.codeIdx = new Map(S.codes.map((c) => [c.code, c])); };
+const hexRgb = (hex) => { const n = parseInt(hex.replace('#', ''), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
+const textOn = (hex) => { const [r, g, b] = hexRgb(hex); return 0.299 * r + 0.587 * g + 0.114 * b > 165 ? '#1f2330' : '#fff'; };
+const lighten = (hex, f) => '#' + hexRgb(hex).map((v) => Math.round(v + (255 - v) * f).toString(16).padStart(2, '0')).join('');
+const safeColor = (c) => (/^#[0-9a-f]{6}$/i.test(c || '') ? c : '#9AA0B5');
+
+function normMa(r) { return { id: String(r.id), sub_nr: r.sub_nr ?? '', name: String(r.name ?? ''), vorname: r.vorname ?? '', sortierung: Number(r.sortierung ?? 0), created_at: String(r.created_at ?? '') }; }
+function normCode(r) { return { code: String(r.code), art: ['baustelle', 'abwesenheit', 'sonstiges'].includes(r.art) ? r.art : 'sonstiges', bezeichnung: r.bezeichnung ?? '', projekt_nummer: r.projekt_nummer ?? '', farbe: safeColor(r.farbe) }; }
+function normEin(r) { return { id: String(r.id), mitarbeiter_id: String(r.mitarbeiter_id), code: String(r.code), start_datum: String(r.start_datum).slice(0, 10), end_datum: String(r.end_datum).slice(0, 10), notiz: r.notiz ?? null, created_at: String(r.created_at ?? '') }; }
+
+/* Supabase liefert standardmäßig höchstens 1000 Zeilen je Anfrage → seitenweise laden */
+async function apiAll(table, query) {
+  let out = [], off = 0;
+  for (;;) {
+    const page = await api('GET', `${query}&limit=1000&offset=${off}`, undefined, undefined, undefined, table);
+    out = out.concat(page || []);
+    if (!page || page.length < 1000) return out;
+    off += 1000;
+  }
+}
+
+function xlRows() {
+  const ma = XL_MA.map(([sub_nr, name, vorname], i) => ({ id: uid(), sub_nr, name, vorname, sortierung: (i + 1) * 10, created_at: '' }));
+  const codes = XL_CODES.map(([code, art, bezeichnung, projekt_nummer, farbe]) => ({ code, art, bezeichnung, projekt_nummer, farbe }));
+  const eins = XL_EIN.map(([mi, code, s, e]) => ({ id: uid(), mitarbeiter_id: ma[mi].id, code, start_datum: fromDay(d0 + s), end_datum: fromDay(d0 + e), notiz: null, created_at: '' }));
+  return { ma, codes, eins };
+}
+
+/* Was aus der Excel noch nicht in den Daten steht (für den Import nach Supabase) */
+function xlMissing() {
+  const haveMa = new Map();
+  for (const m of S.ma) { const k = maKey(m); if (!haveMa.has(k)) haveMa.set(k, []); haveMa.get(k).push(m.id); }
+  const seenXl = new Map();
+  const haveCodes = new Set(S.codes.map((c) => c.code));
+  const ma = [], idOf = [];
+  XL_MA.forEach(([sub_nr, name, vorname], i) => {
+    const k = maKey({ sub_nr, name, vorname }), n = seenXl.get(k) || 0, ex = haveMa.get(k);
+    seenXl.set(k, n + 1);
+    if (ex && ex[n]) idOf[i] = ex[n];
+    else { const id = uid(); idOf[i] = id; ma.push({ id, sub_nr, name, vorname, sortierung: (i + 1) * 10 }); }
+  });
+  const codes = XL_CODES.filter(([code]) => !haveCodes.has(code)).map(([code, art, bezeichnung, projekt_nummer, farbe]) => ({ code, art, bezeichnung, projekt_nummer, farbe }));
+  const haveE = new Set(S.eins.map((e) => [e.mitarbeiter_id, e.code, e.start_datum, e.end_datum].join('|')));
+  const eins = [];
+  for (const [mi, code, s, e] of XL_EIN) {
+    const row = { mitarbeiter_id: idOf[mi], code, start_datum: fromDay(d0 + s), end_datum: fromDay(d0 + e), notiz: null };
+    if (!haveE.has([row.mitarbeiter_id, code, row.start_datum, row.end_datum].join('|'))) { row.id = uid(); eins.push(row); }
+  }
+  return { ma, codes, eins };
+}
+
+function resetPersonal() {
+  S.ma = []; S.codes = []; S.eins = []; indexCodes(); S.pLoaded = false; S.pDemoLoaded = false; S.pError = null; S.didScrollP = false;
+  if (S.view === 'pers') { render(); loadPersonal(); }
+}
+
+async function loadPersonal(silent) {
+  if (isLive() && !sessionOk()) { showLogin(); return; }
+  if (!isLive()) {
+    if (!S.pDemoLoaded) { const x = xlRows(); S.ma = x.ma; S.codes = x.codes; S.eins = x.eins; S.pDemoLoaded = true; }
+    S.pLoaded = true; S.pError = null;
+  } else {
+    try {
+      const [ma, codes, eins] = await Promise.all([
+        apiAll('mitarbeiter', '?select=*&order=sortierung.asc,id.asc'),
+        apiAll('einsatz_codes', '?select=*&order=code.asc'),
+        apiAll('einsaetze', '?select=*&order=start_datum.asc,id.asc'),
+      ]);
+      if (!silent || S.pending === 0) {
+        S.ma = ma.map(normMa); S.codes = codes.map(normCode); S.eins = eins.map(normEin).filter(validRow);
+        S.pLoaded = true; S.pError = null;
+      }
+    } catch (e) {
+      if (!silent) { S.ma = []; S.codes = []; S.eins = []; S.pLoaded = true; S.pError = e.message; }
+    }
+  }
+  indexCodes();
+  if (S.view === 'pers') {
+    render();
+    if (!S.didScrollP && S.pLoaded && !S.pError) { S.didScrollP = true; scrollToDay(persFocusDay()); }
+  }
+}
+
+/* Startpunkt der Personal-Ansicht: heute, falls dort Einsätze liegen – sonst die Mitte des geplanten Zeitraums */
+function persFocusDay() {
+  let lo = Infinity, hi = -Infinity, near = false;
+  for (const e of S.eins) {
+    if (e.code === 'Ab') continue;
+    const s = toDay(e.start_datum), en = toDay(e.end_datum);
+    lo = Math.min(lo, s); hi = Math.max(hi, en);
+    if (en >= S.today - 30 && s <= S.today + 90) near = true;
+  }
+  return near || lo === Infinity ? S.today : Math.round((lo + hi) / 2);
+}
+
+function setView(v) {
+  if (v === S.view) return;
+  S.view = v; LS.set('view', v); S.prevRs = null; S.query = ''; $('#q').value = ''; hideTip();
+  if (v === 'pers' && !S.pLoaded) { render(); loadPersonal(); }
+  else { render(); scrollToDay(v === 'pers' ? persFocusDay() : S.today); }
+}
+
+/* ---- optimistische Änderungen (Mitarbeiter, Codes, Einsätze) ---- */
+async function updateIn(list, table, id, patch, label) {
+  const i = S[list].findIndex((x) => x.id === id); if (i < 0) return false;
+  const prev = S[list][i]; S[list][i] = { ...prev, ...patch }; render();
+  if (!isLive()) return true;
+  S.pending++;
+  try { await api('PATCH', '?id=eq.' + encodeURIComponent(id), patch, 'return=minimal', undefined, table); return true; }
+  catch (e) { const j = S[list].findIndex((x) => x.id === id); if (j >= 0) S[list][j] = prev; render(); toast(`${label} fehlgeschlagen: ${e.message}`, 'err'); return false; }
+  finally { S.pending--; }
+}
+async function createIn(list, table, input, normFn) {
+  if (!isLive()) { S[list].push({ ...input, id: uid(), created_at: new Date().toISOString() }); render(); return true; }
+  S.pending++;
+  try {
+    const d = await api('POST', '', input, 'return=representation', undefined, table);
+    const r = normFn(Array.isArray(d) ? d[0] : d);
+    if (!S[list].some((x) => x.id === r.id)) S[list].push(r);
+    render(); return true;
+  } catch (e) { toast('Anlegen fehlgeschlagen: ' + e.message, 'err'); return false; }
+  finally { S.pending--; }
+}
+async function deleteMa(id) {
+  if (isLive()) {
+    S.pending++;
+    try { await api('DELETE', '?id=eq.' + encodeURIComponent(id), undefined, undefined, undefined, 'mitarbeiter'); }
+    catch (e) { toast('Löschen fehlgeschlagen: ' + e.message, 'err'); return false; }
+    finally { S.pending--; }
+  }
+  S.ma = S.ma.filter((m) => m.id !== id); S.eins = S.eins.filter((e) => e.mitarbeiter_id !== id); render(); return true;
+}
+async function deleteEin(id) {
+  if (isLive()) {
+    S.pending++;
+    try { await api('DELETE', '?id=eq.' + encodeURIComponent(id), undefined, undefined, undefined, 'einsaetze'); }
+    catch (e) { toast('Löschen fehlgeschlagen: ' + e.message, 'err'); return false; }
+    finally { S.pending--; }
+  }
+  S.eins = S.eins.filter((e) => e.id !== id); render(); return true;
+}
+async function saveCodes(list) {
+  if (!list.length) return true;
+  if (isLive()) {
+    S.pending++;
+    try { await api('POST', '?on_conflict=code', list, 'resolution=merge-duplicates,return=minimal', undefined, 'einsatz_codes'); }
+    catch (e) { toast('Speichern fehlgeschlagen: ' + e.message, 'err'); return false; }
+    finally { S.pending--; }
+  }
+  const m = new Map(S.codes.map((c) => [c.code, c])); for (const c of list) m.set(c.code, c);
+  S.codes = [...m.values()]; indexCodes(); render(); return true;
+}
+
+/* ---- Auswahl & Zählung ---- */
+function persEinBy() {
+  const m = new Map();
+  for (const e of S.eins) { if (!m.has(e.mitarbeiter_id)) m.set(e.mitarbeiter_id, []); m.get(e.mitarbeiter_id).push(e); }
+  return m;
+}
+function persPeople() {
+  const q = S.query.trim().toLowerCase(), einBy = persEinBy();
+  let people = S.ma.filter((p) => !q || `${p.name} ${p.vorname || ''} ${p.sub_nr || ''}`.toLowerCase().includes(q));
+  if (S.codeFilter) people = people.filter((p) => (einBy.get(p.id) || []).some((e) => e.code === S.codeFilter));
+  return { people, einBy };
+}
+function persGroups(people) {
+  const map = new Map();
+  for (const p of people) { const k = p.sub_nr || '–'; if (!map.has(k)) map.set(k, []); map.get(k).push(p); }
+  return [...map].map(([sub, list]) => ({ key: 'sub:' + sub, sub, list }));
+}
+function persCount(L) {
+  const n = L.re - L.rs + 1, diff = new Int32Array(n + 1);
+  for (const e of S.eins) {
+    if (S.codeFilter ? e.code !== S.codeFilter : codeOf(e.code).art !== 'baustelle') continue;
+    const s = Math.max(toDay(e.start_datum), L.rs), en = Math.min(toDay(e.end_datum), L.re);
+    if (en < s) continue;
+    diff[s - L.rs] += 1; diff[en - L.rs + 1] -= 1;
+  }
+  const out = new Int32Array(n); let run = 0;
+  for (let i = 0; i < n; i++) { run += diff[i]; out[i] = isWork(L.rs + i) ? run : 0; }
+  return out;
+}
+
+/* ---- Darstellung ---- */
+function einBarHtml(e, L) {
+  const c = codeOf(e.code), col = safeColor(c.farbe), s = toDay(e.start_datum), en = toDay(e.end_datum);
+  const left = (s - L.rs) * L.dayW, w = Math.max((en - s + 1) * L.dayW, 6);
+  const isAb = e.code === 'Ab', dim = S.codeFilter && e.code !== S.codeFilter && !isAb;
+  let bg = col, fg = textOn(col);
+  if (c.art === 'abwesenheit' && !isAb) { bg = `repeating-linear-gradient(135deg,${col} 0 7px,${lighten(col, 0.55)} 7px 14px)`; fg = '#1f2330'; }
+  const label = w >= 100 ? `${esc(e.code)} · ${esc(c.bezeichnung)}` : w >= 56 ? esc(c.bezeichnung || e.code) : w >= 26 ? esc(e.code) : '';
+  const nm = maName(maById(e.mitarbeiter_id));
+  let h = `<div class="bar${L.ro ? ' ro' : ''}${isAb ? ' ab' : ''}${dim ? ' dim' : ''}" tabindex="0" data-kind="e" data-id="${esc(e.id)}" role="button" aria-label="${esc(nm)}: ${esc(e.code)} ${esc(c.bezeichnung)}, ${fmtDE(e.start_datum, true)} bis ${fmtDE(e.end_datum, true)}" style="left:${left}px;width:${w}px;background:${bg};color:${fg}">`;
+  if (!L.ro) h += '<div class="h hs"></div>';
+  h += `<span class="lbl" style="text-shadow:none">${label}</span>`;
+  if (!L.ro) h += '<div class="h he"></div>';
+  return h + '</div>';
+}
+
+function tipHtmlE(e) {
+  const c = codeOf(e.code), m = maById(e.mitarbeiter_id);
+  let h = `<div style="font-weight:600">${esc(maName(m))}${m && m.sub_nr ? ' · ' + esc(m.sub_nr) : ''}</div>`;
+  h += `<div>${esc(e.code)} · ${esc(c.bezeichnung)}${c.projekt_nummer ? ' (' + esc(c.projekt_nummer) + ')' : ''}</div>`;
+  h += `<div>${fmtDE(e.start_datum, true)} – ${fmtDE(e.end_datum, true)} · ${workdays(e.start_datum, e.end_datum)} Arbeitstage</div>`;
+  if (e.notiz) h += `<div class="sec" style="color:#cfd6ff">${esc(e.notiz)}</div>`;
+  return h;
+}
+
+function persGroupHtml(g, L) {
+  const zu = S.collapsed.has(g.key), cols = L.compact ? COLS_C : COLS_P;
+  let h = `<div class="rowx" style="height:${GROUP_H}px;width:${L.leftW + L.tw}px"><div class="lc grp" style="width:${L.leftW}px;grid-template-columns:${cols}">`;
+  h += `<div class="cell-name"><button type="button" class="gn js-toggle" data-key="${esc(g.key)}" aria-expanded="${!zu}" style="color:var(--brand)">${zu ? ICON.right : ICON.down}<span class="stripe" style="background:var(--brand)"></span><span class="t">${esc(g.sub)}</span><span class="cnt">${g.list.length}</span></button>`;
+  h += `<button type="button" class="iconbtn js-gadd noprint" data-sub="${esc(g.sub === '–' ? '' : g.sub)}" title="Mitarbeiter zu dieser Gruppe hinzufügen" aria-label="Mitarbeiter hinzufügen">${ICON.plus}</button></div><div></div>`;
+  if (!L.compact) h += '<div></div>';
+  return h + `</div><div class="tc" style="width:${L.tw}px"></div></div>`;
+}
+
+function personRowHtml(p, L, list) {
+  const cols = L.compact ? COLS_C : COLS_P;
+  let tage = 0; for (const e of list) if (codeOf(e.code).art === 'baustelle') tage += workdays(e.start_datum, e.end_datum);
+  let h = `<div class="rowx dr" data-ma="${esc(p.id)}" style="height:${ROW_H}px;width:${L.leftW + L.tw}px"><div class="lc" style="width:${L.leftW}px;grid-template-columns:${cols}">`;
+  h += `<div class="cell-name"><button type="button" class="nm js-person" title="Mitarbeiter bearbeiten" style="padding-left:28px"><span class="t">${esc(maName(p))}</span></button>`;
+  h += `<button type="button" class="iconbtn js-padd noprint" data-ma="${esc(p.id)}" title="Einsatz hinzufügen" aria-label="Einsatz hinzufügen">${ICON.plus}</button></div>`;
+  h += `<div class="small">${esc(p.sub_nr || '')}</div>`;
+  if (!L.compact) h += `<div class="num small" style="padding-right:12px;color:var(--ink)">${tage || ''}</div>`;
+  h += `</div><div class="tc pr" data-ma="${esc(p.id)}" style="width:${L.tw}px">`;
+  for (const e of list) h += einBarHtml(e, L);
+  return h + '</div></div>';
+}
+
+function persAusHtml(L, vals) {
+  let max = 0; for (let i = 0; i < vals.length; i++) if (vals[i] > max) max = vals[i];
+  const c = S.codeFilter ? codeOf(S.codeFilter) : null, showN = L.dayW >= 22;
+  const title = c ? `Personen auf ${esc(c.bezeichnung || c.code)}` : 'Personen auf Baustellen';
+  let h = `<div class="rowx" style="height:${ROW_H}px;width:${L.leftW + L.tw}px"><div class="lc" style="width:${L.leftW}px;display:flex;justify-content:space-between;gap:8px;padding:0 12px"><div style="min-width:0"><div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${title}</div><div class="sub">je Arbeitstag, alle Mitarbeiter</div></div><div style="flex:none;font-size:12px;font-weight:500;color:var(--muted)">max. ${max}</div></div><div class="tc z" style="width:${L.tw}px"><div class="aus">`;
+  for (let i = 0; i < vals.length; i++) {
+    const n = vals[i], day = L.rs + i;
+    const a = n > 0 && max > 0 ? 0.18 + 0.6 * (n / max) : 0;
+    h += `<div title="${WT[wd(day)]} ${fmtDay(day, true)}: ${n} Personen" style="width:${L.dayW}px;background:${n > 0 ? `rgba(0,115,234,${a.toFixed(2)})` : 'transparent'};color:${a > 0.55 ? '#fff' : '#323338'}">${showN && n > 0 ? n : ''}</div>`;
+  }
+  return h + '</div></div></div>';
+}
+
+function renderPers() {
+  const content = $('#content'), scroll = $('#scroll');
+  syncChrome();
+  if (!S.pLoaded) { content.style.width = ''; content.innerHTML = '<div class="loading">Personalplanung wird geladen …</div>'; return; }
+  if (S.pError) {
+    content.style.width = '';
+    content.innerHTML = `<div class="empty"><p class="t">Personalplanung konnte nicht geladen werden</p><p class="s">${esc(S.pError)}</p><p class="s">Falls die Tabellen noch fehlen: Verbindung öffnen und das SQL für die Personalplanung ausführen.</p><div style="margin-top:16px;display:flex;gap:8px;justify-content:center"><button class="btn primary js-sqlP" type="button">Verbindung &amp; SQL</button><button class="btn js-retryP" type="button">Erneut laden</button></div></div>`;
+    updateToolbarPers(); return;
+  }
+  const L = layout(); S.L = L;
+  let { people, einBy } = persPeople();
+  if (S.printWin) people = people.filter((p) => (einBy.get(p.id) || []).some((e) => e.code !== 'Ab' && toDay(e.end_datum) >= L.rs && toDay(e.start_datum) <= L.re));
+  const groups = persGroups(people), vals = persCount(L);
+
+  let h = headerHtml(L) + '<div class="body">' + overlayHtml(L) + persAusHtml(L, vals);
+  if (!groups.length) {
+    const none = !S.ma.length;
+    h += `<div class="empty"><p class="t">${none ? 'Noch keine Mitarbeiter' : 'Keine Mitarbeiter für diese Filter'}</p><p class="s">${none ? 'Lege Mitarbeiter an oder importiere die Excel-Planung (sofern Supabase verbunden ist).' : 'Suche oder Baustellen-Filter anpassen.'}</p>${none ? '<button class="btn primary js-newMa" type="button" style="margin-top:16px">Ersten Mitarbeiter anlegen</button>' : ''}</div>`;
+  } else {
+    for (const g of groups) {
+      h += persGroupHtml(g, L);
+      if (!S.collapsed.has(g.key)) for (const p of g.list) h += personRowHtml(p, L, (einBy.get(p.id) || []).slice().sort((a, b) => a.start_datum.localeCompare(b.start_datum)));
+    }
+  }
+  h += '</div>';
+  content.style.width = L.leftW + L.tw + 'px';
+  content.innerHTML = h;
+  if (!S.printWin) {
+    if (S.prevRs !== null && S.prevRs !== L.rs) scroll.scrollLeft += (S.prevRs - L.rs) * L.dayW;
+    S.prevRs = L.rs;
+  }
+  updateToolbarPers(groups);
+}
+
+function updateToolbarPers(groups) {
+  syncChrome();
+  const sel = $('#selCode');
+  const sig = S.codes.map((c) => c.code + c.bezeichnung).join('|') + '#' + S.codeFilter;
+  if (sel.dataset.sig !== sig) {
+    const cs = [...S.codes].sort((a, b) => (+a.code - +b.code) || a.code.localeCompare(b.code, 'de'));
+    const opt = (c) => `<option value="${esc(c.code)}"${c.code === S.codeFilter ? ' selected' : ''}>${esc(c.code)} · ${esc(c.bezeichnung || c.code)}</option>`;
+    const grp = (label, art) => { const l = cs.filter((c) => c.art === art); return l.length ? `<optgroup label="${label}">${l.map(opt).join('')}</optgroup>` : ''; };
+    sel.innerHTML = `<option value="">Alle Baustellen / Kürzel</option>${grp('Baustellen', 'baustelle')}${grp('Abwesenheiten', 'abwesenheit')}${grp('Sonstiges', 'sonstiges')}`;
+    sel.value = S.codeFilter; sel.dataset.sig = sig;
+  }
+  const keys = (groups || persGroups(persPeople().people)).map((g) => g.key);
+  const allZu = keys.length > 0 && keys.every((k) => S.collapsed.has(k));
+  $('#btnFold').textContent = allZu ? 'Alle ausklappen' : 'Alle einklappen';
+  const miss = xlMissing();
+  $('#btnImportP').hidden = !(isLive() && S.pLoaded && !S.pError && S.eins.length === 0 && miss.eins.length > 0);
+  $('#btnImportP').textContent = `Excel-Planung importieren (${miss.eins.length})`;
+}
+
+/* ---- Dialog: Einsatz ---- */
+const dlgE = $('#dlgEin'), frmE = $('#frmE');
+const E = { ma: $('#e-ma'), code: $('#e-code'), start: $('#e-start'), end: $('#e-end'), note: $('#e-note') };
+let editE = { isEdit: false, id: null };
+function fillEinForm(p) {
+  E.ma.innerHTML = S.ma.map((m) => `<option value="${esc(m.id)}">${esc(maName(m))}${m.sub_nr ? ' (' + esc(m.sub_nr) + ')' : ''}</option>`).join('');
+  const cs = [...S.codes].sort((a, b) => (+a.code - +b.code) || a.code.localeCompare(b.code, 'de'));
+  const opt = (c) => `<option value="${esc(c.code)}">${esc(c.code)} · ${esc(c.bezeichnung || c.code)}</option>`;
+  const grp = (label, art) => { const l = cs.filter((c) => c.art === art); return l.length ? `<optgroup label="${label}">${l.map(opt).join('')}</optgroup>` : ''; };
+  E.code.innerHTML = grp('Baustellen', 'baustelle') + grp('Abwesenheiten', 'abwesenheit') + grp('Sonstiges', 'sonstiges');
+  E.ma.value = p.mitarbeiter_id || (S.ma[0] && S.ma[0].id) || ''; E.code.value = p.code || S.codeFilter || (E.code.options[0] && E.code.options[0].value) || '';
+  E.start.value = p.start_datum || ''; E.end.value = p.end_datum || ''; E.note.value = p.notiz || '';
+  $('#eErr').hidden = true; updateEPreview();
+}
+function updateEPreview() {
+  const box = $('#e-prev');
+  if (!E.start.value || !E.end.value || E.end.value < E.start.value) { box.hidden = true; return; }
+  box.hidden = false; box.textContent = `${workdays(E.start.value, E.end.value)} Arbeitstage (Mo–Fr ohne Feiertage Sachsen)`;
+}
+[E.start, E.end].forEach((el) => el.addEventListener('input', updateEPreview));
+function openEinsatzNew(preset) {
+  if (!S.ma.length) { toast('Bitte zuerst einen Mitarbeiter anlegen.', 'err'); return; }
+  editE = { isEdit: false, id: null };
+  $('#eTitle').textContent = 'Neuer Einsatz'; $('#eDesc').textContent = 'Baustelle oder Kürzel (z. B. Urlaub) für einen Zeitraum eintragen.';
+  $('#eDel').innerHTML = ''; $('#eSave').textContent = 'Einsatz anlegen';
+  fillEinForm({ start_datum: fromDay(S.today), end_datum: fromDay(S.today + 4), ...preset });
+  showDlg(dlgE);
+}
+function openEinsatz(id) {
+  const e = einById(id); if (!e) return;
+  editE = { isEdit: true, id };
+  $('#eTitle').textContent = 'Einsatz bearbeiten'; $('#eDesc').textContent = 'Änderungen gelten sofort im Zeitstrahl.';
+  $('#eDel').innerHTML = '<button type="button" class="btn ghost red sm" id="eDelAsk">Löschen</button>'; $('#eSave').textContent = 'Änderungen speichern';
+  fillEinForm(e); showDlg(dlgE);
+}
+frmE.addEventListener('submit', async (ev) => {
+  ev.preventDefault();
+  const err = $('#eErr'), fail = (m) => { err.textContent = m; err.hidden = false; };
+  if (!E.ma.value) return fail('Bitte einen Mitarbeiter wählen.');
+  if (!E.code.value) return fail('Bitte eine Baustelle bzw. ein Kürzel wählen.');
+  if (!E.start.value || !E.end.value) return fail('Bitte Start- und Enddatum angeben.');
+  if (E.end.value < E.start.value) return fail('Das Ende darf nicht vor dem Start liegen.');
+  err.hidden = true;
+  const input = { mitarbeiter_id: E.ma.value, code: E.code.value, start_datum: E.start.value, end_datum: E.end.value, notiz: E.note.value.trim() || null };
+  const btn = $('#eSave'); btn.disabled = true;
+  const ok = editE.isEdit ? await updateIn('eins', 'einsaetze', editE.id, input, 'Speichern') : await createIn('eins', 'einsaetze', input, normEin);
+  btn.disabled = false; if (ok) closeDlg(dlgE);
+});
+$('#eCancel').addEventListener('click', () => closeDlg(dlgE));
+$('#eDel').addEventListener('click', async (ev) => {
+  if (ev.target.id === 'eDelAsk') $('#eDel').innerHTML = '<span style="display:flex;gap:8px"><button type="button" class="btn danger sm" id="eDelGo">Endgültig löschen</button><button type="button" class="btn ghost sm" id="eDelNo">Abbrechen</button></span>';
+  else if (ev.target.id === 'eDelNo') $('#eDel').innerHTML = '<button type="button" class="btn ghost red sm" id="eDelAsk">Löschen</button>';
+  else if (ev.target.id === 'eDelGo') { ev.target.disabled = true; if (await deleteEin(editE.id)) closeDlg(dlgE); else ev.target.disabled = false; }
+});
+
+/* ---- Dialog: Mitarbeiter ---- */
+const dlgM = $('#dlgMa'), frmM = $('#frmM');
+let editM = { isEdit: false, id: null };
+function fillMaForm(p) {
+  $('#m-name').value = p.name || ''; $('#m-vor').value = p.vorname || ''; $('#m-sub').value = p.sub_nr || ''; $('#mErr').hidden = true;
+  $('#subs').innerHTML = [...new Set(S.ma.map((m) => m.sub_nr).filter(Boolean))].map((s) => `<option value="${esc(s)}"></option>`).join('');
+}
+function openMaNew(preset) {
+  editM = { isEdit: false, id: null };
+  $('#mTitle').textContent = 'Neuer Mitarbeiter'; $('#mDesc').textContent = 'Die Sub-Nr. bestimmt die Gruppe in der Liste.';
+  $('#mDel').innerHTML = ''; $('#mSave').textContent = 'Mitarbeiter anlegen'; fillMaForm(preset || {}); showDlg(dlgM); $('#m-name').focus();
+}
+function openMa(id) {
+  const m = maById(id); if (!m) return;
+  editM = { isEdit: true, id };
+  $('#mTitle').textContent = 'Mitarbeiter bearbeiten'; $('#mDesc').textContent = '';
+  $('#mDel').innerHTML = '<button type="button" class="btn ghost red sm" id="mDelAsk">Löschen</button>'; $('#mSave').textContent = 'Änderungen speichern'; fillMaForm(m); showDlg(dlgM);
+}
+frmM.addEventListener('submit', async (ev) => {
+  ev.preventDefault();
+  const name = $('#m-name').value.trim();
+  if (!name) { $('#mErr').textContent = 'Bitte einen Namen angeben.'; $('#mErr').hidden = false; return; }
+  $('#mErr').hidden = true;
+  const input = { sub_nr: $('#m-sub').value.trim(), name, vorname: $('#m-vor').value.trim() };
+  const btn = $('#mSave'); btn.disabled = true;
+  let ok;
+  if (editM.isEdit) ok = await updateIn('ma', 'mitarbeiter', editM.id, input, 'Speichern');
+  else ok = await createIn('ma', 'mitarbeiter', { ...input, sortierung: S.ma.reduce((a, m) => Math.max(a, m.sortierung), 0) + 10 }, normMa);
+  btn.disabled = false; if (ok) closeDlg(dlgM);
+});
+$('#mCancel').addEventListener('click', () => closeDlg(dlgM));
+$('#mDel').addEventListener('click', async (ev) => {
+  if (ev.target.id === 'mDelAsk') $('#mDel').innerHTML = '<span style="display:flex;gap:8px"><button type="button" class="btn danger sm" id="mDelGo">Mit allen Einsätzen löschen</button><button type="button" class="btn ghost sm" id="mDelNo">Abbrechen</button></span>';
+  else if (ev.target.id === 'mDelNo') $('#mDel').innerHTML = '<button type="button" class="btn ghost red sm" id="mDelAsk">Löschen</button>';
+  else if (ev.target.id === 'mDelGo') { ev.target.disabled = true; if (await deleteMa(editM.id)) closeDlg(dlgM); else ev.target.disabled = false; }
+});
+
+/* ---- Dialog: Legende / Kürzel ---- */
+const dlgCodes = $('#dlgCodes');
+const ARTEN = [['baustelle', 'Baustelle'], ['abwesenheit', 'Abwesenheit'], ['sonstiges', 'Sonstiges']];
+function codeRowHtml(c, isNew) {
+  return `<div class="crow" data-code="${isNew ? '' : esc(c.code)}"><input type="color" class="c-col" value="${safeColor(c.farbe).toLowerCase()}" aria-label="Farbe"><input type="text" class="c-code" value="${esc(c.code)}" ${isNew ? '' : 'readonly'} maxlength="12" aria-label="Kürzel"><input type="text" class="c-name" value="${esc(c.bezeichnung)}" aria-label="Bezeichnung"><input type="text" class="c-pnr" value="${esc(c.projekt_nummer)}" aria-label="Projektnummer"><select class="c-art" aria-label="Art">${ARTEN.map(([v, l]) => `<option value="${v}"${v === c.art ? ' selected' : ''}>${l}</option>`).join('')}</select></div>`;
+}
+function openCodes() {
+  const cs = [...S.codes].sort((a, b) => (a.art === 'baustelle' ? 0 : 1) - (b.art === 'baustelle' ? 0 : 1) || (+a.code - +b.code) || a.code.localeCompare(b.code, 'de'));
+  $('#codeList').innerHTML = cs.map((c) => codeRowHtml(c, false)).join(''); $('#cErr').hidden = true; showDlg(dlgCodes);
+}
+$('#btnLegend').addEventListener('click', openCodes);
+$('#cAdd').addEventListener('click', () => {
+  $('#codeList').insertAdjacentHTML('beforeend', codeRowHtml({ code: '', art: 'baustelle', bezeichnung: '', projekt_nummer: '', farbe: '#579bfc' }, true));
+  const l = $('#codeList'); l.scrollTop = l.scrollHeight; l.lastElementChild.querySelector('.c-code').focus();
+});
+$('#cCancel').addEventListener('click', () => closeDlg(dlgCodes));
+$('#cSave').addEventListener('click', async () => {
+  const rows = [...document.querySelectorAll('#codeList .crow')], seen = new Set(), changed = [], err = $('#cErr');
+  for (const r of rows) {
+    const code = r.querySelector('.c-code').value.trim();
+    if (!code) { if (r.dataset.code === '') continue; err.textContent = 'Ein Kürzel darf nicht leer sein.'; err.hidden = false; return; }
+    if (seen.has(code)) { err.textContent = `Das Kürzel „${code}“ ist doppelt vorhanden.`; err.hidden = false; return; }
+    seen.add(code);
+    const c = { code, art: r.querySelector('.c-art').value, bezeichnung: r.querySelector('.c-name').value.trim(), projekt_nummer: r.querySelector('.c-pnr').value.trim(), farbe: r.querySelector('.c-col').value.toUpperCase() };
+    const old = S.codeIdx.get(code);
+    if (!old || old.art !== c.art || old.bezeichnung !== c.bezeichnung || old.projekt_nummer !== c.projekt_nummer || old.farbe.toUpperCase() !== c.farbe) changed.push(c);
+  }
+  err.hidden = true; $('#cSave').disabled = true;
+  const ok = await saveCodes(changed); $('#cSave').disabled = false; if (ok) closeDlg(dlgCodes);
+});
+
+/* ---- Toolbar-Aktionen Personal ---- */
+$('#btnNewE').addEventListener('click', () => openEinsatzNew({}));
+$('#btnNewMa').addEventListener('click', () => openMaNew({}));
+$('#selCode').addEventListener('change', (e) => { S.codeFilter = e.target.value; render(); });
+$('#sql2').textContent = SQL_P;
+$('#sqlCopy2').addEventListener('click', async () => {
+  try { await navigator.clipboard.writeText(SQL_P); $('#sqlCopy2').textContent = 'Kopiert ✓'; }
+  catch { const r = document.createRange(); r.selectNodeContents($('#sql2')); const s = getSelection(); s.removeAllRanges(); s.addRange(r); $('#sqlCopy2').textContent = 'Markiert – jetzt kopieren'; }
+});
+
+/* ---- Import der Excel-Planung nach Supabase ---- */
+const dlgImportP = $('#dlgImportP');
+$('#btnImportP').addEventListener('click', () => {
+  const m = xlMissing();
+  $('#impPText').textContent = `${m.eins.length} Einsatzzeiträume${m.ma.length ? `, ${m.ma.length} Mitarbeiter` : ''}${m.codes.length ? ` und ${m.codes.length} Kürzel` : ''} aus der Excel-Planung in Supabase anlegen. Bereits vorhandene Daten werden übersprungen. Die Tabellen mitarbeiter, einsatz_codes und einsaetze müssen existieren (SQL in der Verbindung).`;
+  showDlg(dlgImportP);
+});
+$('#impPCancel').addEventListener('click', () => closeDlg(dlgImportP));
+$('#impPGo').addEventListener('click', async () => {
+  const m = xlMissing();
+  if (!m.eins.length) { closeDlg(dlgImportP); return; }
+  $('#impPGo').disabled = true; S.pending++;
+  let failed = false;
+  try {
+    if (m.codes.length) await api('POST', '?on_conflict=code', m.codes, 'resolution=ignore-duplicates,return=minimal', undefined, 'einsatz_codes');
+    for (let i = 0; i < m.ma.length; i += 100) await api('POST', '', m.ma.slice(i, i + 100), 'return=minimal', undefined, 'mitarbeiter');
+    for (let i = 0; i < m.eins.length; i += 200) await api('POST', '', m.eins.slice(i, i + 200), 'return=minimal', undefined, 'einsaetze');
+    closeDlg(dlgImportP); toast(`${m.eins.length} Einsatzzeiträume importiert.`, 'ok');
+  } catch (e) { failed = true; closeDlg(dlgImportP); toast('Import fehlgeschlagen: ' + e.message, 'err'); }
+  finally { S.pending--; $('#impPGo').disabled = false; }
+  await loadPersonal(false);
+});
+
+/* ===================================================================
+   Import: Bauablaufplan in Supabase übernehmen
+   =================================================================== */
+const dlgImport = $('#dlgImport');
+$('#btnImport').addEventListener('click', () => {
+  const miss = frankfurtMissing();
+  const soll = miss.filter((r) => r.typ === 'SOLL').length, ist = miss.length - soll, beh = miss.filter((r) => r.ist_behindert).length;
+  $('#impText').textContent = `${miss.length} Einträge aus dem Bauablaufplan dem Bauablaufplan in Supabase anlegen: ${soll} SOLL, ${ist} IST, davon ${beh} Behinderungsphasen. Bereits vorhandene Einträge werden übersprungen. Arbeitskräfte stehen auf 1 und lassen sich danach je Eintrag anpassen.`;
+  showDlg(dlgImport);
+});
+$('#impCancel').addEventListener('click', () => closeDlg(dlgImport));
+$('#impGo').addEventListener('click', async () => {
+  const miss = frankfurtMissing();
+  if (!miss.length) { closeDlg(dlgImport); return; }
+  $('#impGo').disabled = true;
+  let failed = false;
+  S.pending++;
+  try {
+    for (let i = 0; i < miss.length; i += 50) {
+      const d = await api('POST', '', miss.slice(i, i + 50), 'return=representation');
+      for (const r of d || []) { const n = norm(r); if (validRow(n) && !S.rows.some((x) => x.id === n.id)) S.rows.push(n); }
+    }
+    closeDlg(dlgImport); render();
+    toast(`${miss.length} Einträge importiert.`, 'ok');
+  } catch (e) { failed = true; toast('Import fehlgeschlagen: ' + e.message, 'err'); }
+  finally { S.pending--; $('#impGo').disabled = false; }
+  if (failed) { closeDlg(dlgImport); await load(true); }
+});
+
+/* ===================================================================
+   Anmeldung: Formular, Abmelden, Zugriffs-SQL
+   =================================================================== */
+const SQL_AUTH = `-- Schritt 3: Zugriff nur für angemeldete Nutzer (im SQL Editor ausführen)
+do $$
+declare t text;
+begin
+  foreach t in array array['projekte', 'mitarbeiter', 'einsatz_codes', 'einsaetze'] loop
+    if to_regclass('public.' || t) is not null then
+      execute format('drop policy if exists "Voller Zugriff" on public.%I', t);
+      execute format('drop policy if exists "Nur angemeldet" on public.%I', t);
+      execute format('create policy "Nur angemeldet" on public.%I for all to authenticated using (true) with check (true)', t);
+    end if;
+  end loop;
+end $$;`;
+$('#sql3').textContent = SQL_AUTH;
+$('#sqlCopy3').addEventListener('click', async () => {
+  try { await navigator.clipboard.writeText(SQL_AUTH); $('#sqlCopy3').textContent = 'Kopiert ✓'; }
+  catch { const r = document.createRange(); r.selectNodeContents($('#sql3')); const s = getSelection(); s.removeAllRanges(); s.addRange(r); $('#sqlCopy3').textContent = 'Markiert – jetzt kopieren'; }
+});
+$('#sLogout').addEventListener('click', () => { closeDlg(dlgSet); signOut(); });
+$('#lConn').addEventListener('click', openSettings);
+$('#loginForm').addEventListener('submit', async (ev) => {
+  ev.preventDefault();
+  const email = $('#l-mail').value.trim(), pw = $('#l-pw').value, err = $('#lErr');
+  const fail = (m) => { err.textContent = m; err.hidden = false; };
+  if (!email || !pw) return fail('Bitte E-Mail und Passwort eingeben.');
+  err.hidden = true; $('#lGo').disabled = true;
+  try { await signIn(email, pw); } catch (e) { $('#lGo').disabled = false; return fail(e.message); }
+  $('#lGo').disabled = false; $('#l-pw').value = ''; hideLogin();
+  S.didScroll = false; S.loading = true; resetPersonal();
+  await load();
+});
+
+// Automatische Aktualisierung (Ersatz für Realtime): alle 30 s, solange nichts bearbeitet wird
+setInterval(() => {
+  if (isLive() && sessionOk() && !document.hidden && !drag && S.pending === 0 && !S.printWin && !document.querySelector('dialog[open]')) { load(true); if (S.view === 'pers') loadPersonal(true); }
+}, 30000);
+
+load();
+if (S.view === 'pers') { S.pLoaded = false; loadPersonal(); }
+})();
+</script>
+</body>
+</html>
